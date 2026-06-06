@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Asistencias</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0f1218;font-family:'IBM Plex Mono',monospace;color:#f0ede8;font-size:15px;}
+.wrap{max-width:1200px;margin:0 auto;padding:28px 36px 70px;}
+.hdr{border-bottom:3px solid #f0ede8;margin-bottom:20px;padding-bottom:14px;}
+.hdr h1{font-family:'Bebas Neue',sans-serif;font-size:54px;letter-spacing:5px;line-height:1;}
+.hdr-sub{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#8a9ab0;margin-top:5px;}
+.tarifas{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.tarifa{background:#1a1e28;border:1.5px solid #2a3050;border-radius:4px;padding:6px 14px;font-size:13px;color:#8899bb;}
+.tarifa b{color:#b8f070;font-size:15px;}
+.tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.tab{flex:1;min-width:100px;padding:13px 8px;border:2px solid #2a2d35;border-radius:5px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;color:#8899bb;font-weight:700;text-align:center;transition:all 0.15s;}
+.tab:hover{border-color:#555;color:#ccc;background:#1a1d24;}
+.tab.on{background:#f0ede8;border-color:#f0ede8;color:#0f1218;}
+.btn-rep{width:100%;padding:13px;background:#1a3a1a;border:2px solid #2d8a2d;border-radius:5px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#a8e063;
+  cursor:pointer;letter-spacing:1px;margin-bottom:16px;}
+.sec{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#8a9ab0;font-weight:700;
+  margin:18px 0 12px;display:flex;align-items:center;gap:8px;}
+.sec::after{content:'';flex:1;height:1.5px;background:#22263a;}
+.fl{display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#8899bb;margin-bottom:5px;font-weight:700;}
+.fi{width:100%;border:2px solid #22263a;border-radius:4px;padding:10px 13px;
+  font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:700;
+  background:#0d1016;color:#f0ede8;outline:none;-webkit-appearance:none;}
+.fi:focus{border-color:#a8e063;}
+.fi::placeholder{color:#333;font-weight:400;}
+.fi option{background:#1a1d24;}
+.ac{border:2px solid #1e2230;border-radius:6px;margin-bottom:10px;overflow:hidden;}
+.ahd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#161a24;}
+.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.anm{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;flex:1;}
+.abd{padding:16px;background:#0e1115;border-top:1px solid #1e2230;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.trow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.tlbl{font-size:13px;color:#8899bb;flex:1;}
+.tgl{position:relative;width:42px;height:24px;flex-shrink:0;}
+.tgl input{opacity:0;width:0;height:0;}
+.tsl{position:absolute;cursor:pointer;inset:0;background:#222;border-radius:24px;transition:0.2s;}
+.tsl::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#555;border-radius:50%;transition:0.2s;}
+.tgl input:checked+.tsl{background:#2d6a2d;}
+.tgl input:checked+.tsl::before{transform:translateX(18px);background:#a8e063;}
+.ops-lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8899bb;margin:10px 0 6px;font-weight:700;}
+.ops-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.op-base{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#1a2a1a;color:#4a8a4a;border:1.5px solid #2a4a2a;}
+.op-extra{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#2a1e10;color:#8a6030;border:1.5px solid #4a3010;display:flex;align-items:center;gap:5px;}
+.bx{background:transparent;border:none;color:#555;cursor:pointer;font-size:14px;padding:0;line-height:1;}
+.bx:hover{color:#f08060;}
+.add-row{display:flex;gap:8px;}
+.add-row input{flex:1;border:2px solid #22263a;border-radius:4px;padding:10px 13px;
+  font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;background:#0d1016;color:#f0ede8;outline:none;}
+.add-row input:focus{border-color:#a8e063;}
+.add-row input::placeholder{color:#333;font-weight:400;}
+.btn-g{padding:10px 18px;background:#a8e063;border:none;border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;color:#080808;cursor:pointer;white-space:nowrap;}
+.btn-sm{padding:7px 14px;border:2px solid #2a2d35;border-radius:4px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;color:#8899bb;margin-top:8px;}
+.btn-sm:hover{border-color:#f08060;color:#f08060;}
+.nueva{background:#0e1115;border:2px solid #22263a;border-radius:6px;padding:16px;margin-bottom:14px;}
+.lb{border:2px solid #1e2230;border-radius:5px;margin-bottom:8px;overflow:hidden;}
+.lbhd{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;background:#161a24;}
+.lbnm{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;flex:1;}
+.lbct{font-size:13px;color:#8899bb;}
+.lbbd{padding:14px 16px;background:#0e1115;border-top:1px solid #1e2230;}
+.nlist{display:flex;flex-direction:column;gap:5px;margin-bottom:10px;}
+.nitem{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#161a24;border-radius:4px;}
+.nitem-nm{flex:1;font-size:14px;font-weight:600;}
+.btn-ini{width:100%;padding:14px;background:#a8e063;border:none;border-radius:5px;
+  font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:#080808;cursor:pointer;letter-spacing:2px;margin-top:14px;}
+.ls{margin-bottom:16px;}
+.lshd{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:5px;margin-bottom:10px;}
+.lsnm{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;}
+.lsinf{font-size:13px;color:#aab0c0;margin-left:auto;font-weight:700;}
+.tw{display:flex;align-items:center;gap:8px;padding:11px 14px;background:#141720;border:1.5px solid #22263a;border-radius:5px;margin-bottom:4px;cursor:pointer;}
+.tw:hover{border-color:#333;background:#111418;}
+.tw.aus{opacity:0.35;}
+.tw-nm{font-size:15px;font-weight:700;flex:1;color:#f0ede8;}
+.tw-tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:10px;letter-spacing:1px;white-space:nowrap;}
+.tw-cost{font-size:14px;font-weight:700;color:#a8e063;min-width:75px;text-align:right;}
+.tw-arr{color:#333;font-size:12px;}
+.tw-det{background:#090c10;border:1.5px solid #1e2230;border-radius:5px;padding:14px 18px;margin-bottom:4px;}
+.dist{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.dist-r{display:flex;align-items:center;gap:8px;font-size:13px;}
+.bw{flex:1;height:6px;background:#1e2230;border-radius:3px;overflow:hidden;}
+.bf{height:100%;border-radius:3px;}
+.dnm{min-width:85px;font-weight:700;font-size:13px;}
+.dc{font-weight:700;color:#a8e063;min-width:75px;text-align:right;font-size:13px;}
+.pc{background:#161a24;border:1.5px solid #22263a;border-radius:5px;padding:12px 15px;margin-bottom:8px;}
+.phd{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.pnm{font-size:14px;font-weight:700;flex:1;}
+.pgrid{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;}
+.plbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#8899bb;margin-bottom:5px;font-weight:700;}
+.pinp{width:100%;border:2px solid #22263a;border-radius:4px;padding:10px 12px;
+  font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:700;
+  background:#0d1016;color:#f0ede8;outline:none;-webkit-appearance:none;}
+.pinp:focus{border-color:#a8e063;}
+.baus{padding:7px 12px;border:2px solid #2a2d35;border-radius:4px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;color:#8899bb;}
+.mov-panel{background:#161a24;border:2px solid #22263a;border-radius:6px;padding:16px;margin-bottom:12px;}
+.mov-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#a8e063;font-weight:700;margin-bottom:12px;}
+.seg-card{background:#1e2230;border:1.5px solid #2a2d3e;border-radius:5px;padding:14px 18px;margin-bottom:10px;}
+.seg-hd{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.seg-nm{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;flex:1;}
+.seg-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+.seg-lbl{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:#8899bb;margin-bottom:5px;font-weight:700;}
+.seg-inp{width:100%;border:2px solid #2a2d3e;border-radius:4px;padding:10px 12px;
+  font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;
+  background:#0d1016;color:#f0ede8;outline:none;-webkit-appearance:none;}
+.seg-inp:focus{border-color:#a8e063;}
+.btn-add-seg{width:100%;padding:11px;border:2px solid #333;border-radius:4px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;color:#8899bb;margin-top:6px;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.chip{padding:6px 14px;border:2px solid #22263a;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;color:#8899bb;background:transparent;}
+.chip.sel{color:#f0ede8;border-color:#555;background:#22263a;}
+.rl{border:2px solid #1e2230;border-radius:5px;margin-bottom:8px;overflow:hidden;}
+.rlhd{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;}
+.rlnm{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;}
+.rltot{font-size:22px;font-weight:700;color:#a8e063;}
+.rlbd{padding:12px 18px;background:#0e1115;border-top:1px solid #1e2230;}
+.rlr{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #1e2230;}
+.rlr label{color:#8899bb;}.rlr span{font-weight:700;}
+.gran{background:#1a1e2a;border:2px solid #2d3550;border-radius:6px;padding:18px 24px;
+  display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.hcard{border:2px solid #1e2230;border-radius:5px;margin-bottom:8px;overflow:hidden;}
+.hhd{background:#161a24;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;}
+.hfecha{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;}
+.hbd{padding:12px 18px;background:#0e1115;}
+.hr{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #1e2230;}
+.hr label{color:#8899bb;}.hr span{font-weight:700;}
+.bdanger{width:100%;padding:12px;border:2px solid #2a2d35;border-radius:5px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;color:#8899bb;font-weight:700;margin-top:12px;}
+.empty{text-align:center;color:#333;padding:36px 0;font-size:13px;letter-spacing:2px;}
+.confirm{padding:14px 18px;border-radius:5px;margin-top:10px;}
+.confirm p{font-size:14px;font-weight:700;margin-bottom:12px;}
+.cfbtns{display:flex;gap:10px;}
+.cfbtns button{flex:1;padding:11px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;}
+.csi{background:#cc4a4a;border:none;color:#fff;}
+.cno{background:transparent;border:2px solid #333;color:#8899bb;}
+.btn-lc{width:100%;padding:8px;border:2px solid;border-radius:5px;background:transparent;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;margin-bottom:8px;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+
+const SUELDO_DIA   = 360;
+const COSTO_HREXT  = 50;
+const HORAS_JORNAL = 8;
+
+const COLORES    = ["#2d8a2d","#4a7acc","#cc4a4a","#cc8a00","#8a4acc","#cc6600","#008a8a","#8a008a","#6a8a00","#cc4488"];
+const COLORES_BG = ["#0d1a0d","#0d111a","#1a0d0d","#1a150d","#130d1a","#1a110d","#0d1a1a","#1a0d1a","#131a0d","#1a0d11"];
+
+const OPS_GENERAL   = ["Descargador","Montacarguista","Vaciador","Rezagadora","Limpieza","Rolero","Estibador","Jefe de linea"];
+const OPS_EMBOLSADO = ["Surtidor","Limpieza","Jefe de linea","Estibador"];
+const OPS_CARTON    = ["Operador","Enbultador","Acarreador"];
+const OPS_INDIRECTOS= ["Embarques","Trazabilidad","Materiales","Escaneadora","Carton","Calidad","Auxiliar general","Mantenimiento","Enbultador"];
+const OPS_EURO_EXTRA= ["Jefe de linea","Seleccionadora","Etiquetadora","Emplayador","Multifuncional","Singulador","Rezagadora","Vaciador","Estibador","Limpieza"];
+
+// Plantilla fija - nunca se pierde aunque se actualice el artefacto
+const PLANTILLA_FIJA = {
+  persa: [
+    { nombre:"Alberto Guadalupe Cruz Hernandez",  operacion:"Jefe de linea",   local:true  },
+    { nombre:"Gerardo Luna Garay",                operacion:"Montacarguista",  local:true  },
+    { nombre:"Juan Manuel Santiz Gomez",          operacion:"Vaciador",        local:false },
+    { nombre:"Jair Perez Hernandez",              operacion:"Vaciador",        local:false },
+    { nombre:"Juan Carlos Ruiz Perez",            operacion:"Vaciador",        local:false },
+    { nombre:"Isabel Lopez Jimenez",              operacion:"Rezagadora",      local:false },
+    { nombre:"Leticia Lopez Hernandez",           operacion:"Rezagadora",      local:false },
+    { nombre:"Maria Magdalena Mendez Luna",       operacion:"Rezagadora",      local:false },
+    { nombre:"Juana Antonia Perez Garcia",        operacion:"Rezagadora",      local:false },
+    { nombre:"Teresa Perez Guzman",               operacion:"Rezagadora",      local:false },
+    { nombre:"Brenda Lucia Lorenzo Guzman",       operacion:"Rezagadora",      local:false },
+    { nombre:"Jacqueline Aguilar Guzman",         operacion:"Rezagadora",      local:false },
+    { nombre:"Daniel de Jesus Aguilar Hernandez", operacion:"Rolero",          local:false },
+    { nombre:"Fabian Espinoza Lopez",             operacion:"Limpieza",        local:false },
+    { nombre:"Carlos Adonai Perez Perez",         operacion:"Estibador",       local:false },
+  ],
+  euro: [
+    { nombre:"Cesar Ramon Lopez",                 operacion:"Jefe de linea",   local:true  },
+    { nombre:"Araceli Santiz Gomez",              operacion:"Seleccionadora",  local:false },
+    { nombre:"Ana Gabriela Perez Santiz",         operacion:"Etiquetadora",    local:false },
+    { nombre:"Esther Santiz Gomez",               operacion:"Etiquetadora",    local:false },
+    { nombre:"Elsie Nayeli Santiz Gomez",         operacion:"Etiquetadora",    local:false },
+    { nombre:"Griselda Mendez Lopez",             operacion:"Rezagadora",      local:false },
+    { nombre:"Mario Ezequiel Santiz Morales",     operacion:"Rezagadora",      local:false },
+    { nombre:"Juan Torres Mendez",                operacion:"Rezagadora",      local:false },
+    { nombre:"Alexander Giovanni Santiz Morales", operacion:"Rezagadora",      local:false },
+    { nombre:"Juan de Dios Hernandez Hernandez",  operacion:"Rezagadora",      local:false },
+    { nombre:"Rodolfo Rodriguez Hernandez",       operacion:"Singulador",      local:true  },
+    { nombre:"Fabian Hernandez Torres",           operacion:"Emplayador",      local:true  },
+    { nombre:"Antonio Martin Jimenez Ruiz",       operacion:"Vaciador",        local:false },
+    { nombre:"Juan Ramon Lopez Gomez",            operacion:"Vaciador",        local:false },
+    { nombre:"Enoc Santiz Gomez",                 operacion:"Multifuncional",  local:false },
+    { nombre:"Mateo Santiz Gomez",                operacion:"Multifuncional",  local:false },
+    { nombre:"Jesus Domingo Lopez Garcia",        operacion:"Multifuncional",  local:false },
+    { nombre:"Jose Amilcar Aguilar Jimenez",      operacion:"Estibador",       local:false },
+    { nombre:"Victor Manuel Guzman Jimenez",      operacion:"Estibador",       local:false },
+    { nombre:"Brenda Lizbeth Morales Miranda",    operacion:"Seleccionadora",  local:false },
+    { nombre:"Basilia Lopez Encino",              operacion:"Seleccionadora",  local:false },
+    { nombre:"Silvano Hernandez Pozos",           operacion:"Limpieza",        local:false },
+  ],
+  indirectos: [
+    { nombre:"Xochil Viridiana Limetta Cuero",      operacion:"Embarques",        local:true  },
+    { nombre:"Jose Eduardo Tobias",                 operacion:"Embarques",        local:true  },
+    { nombre:"Jordan Fernando Alvarado Abotes",     operacion:"Embarques",        local:false },
+    { nombre:"Bernabe Flores Salazar",              operacion:"Embarques",        local:true  },
+    { nombre:"Cristo Fernando Matamoros Rodriguez", operacion:"Trazabilidad",     local:true  },
+    { nombre:"Elsa Guadalupe Reyes Amaya",          operacion:"Trazabilidad",     local:true  },
+    { nombre:"Griselda Mireya Guzman Sanchez",      operacion:"Trazabilidad",     local:false },
+    { nombre:"Erika Santiz Lopez",                  operacion:"Trazabilidad",     local:false },
+    { nombre:"Hector Bautista Hernandez",           operacion:"Trazabilidad",     local:false },
+    { nombre:"Luis Bernal",                         operacion:"Materiales",       local:true  },
+    { nombre:"Edgar Alonso Gutierrez",              operacion:"Materiales",       local:true  },
+    { nombre:"Inelda Jimenez Lopez",                operacion:"Escaneadora",      local:false },
+    { nombre:"Rafael Sanchez Aguilar",              operacion:"Carton",           local:false },
+    { nombre:"Carlos Aguilar Guzman",               operacion:"Carton",           local:false },
+    { nombre:"Samuel Hernandez Aguilar",            operacion:"Carton",           local:false },
+    { nombre:"Ottoniel Cruz Melo",                  operacion:"Enbultador",       local:false },
+    { nombre:"Getzemani Gonzalez Carreon",          operacion:"Auxiliar general", local:true  },
+    { nombre:"Silvestre Lopez Perez",               operacion:"Calidad",          local:true  },
+    { nombre:"Ami Dayana Jimenez Feliciano",        operacion:"Calidad",          local:false },
+    { nombre:"Edgar Hernandez Espinoza",            operacion:"Calidad",          local:false },
+    { nombre:"Julio Lopez Ramos",                   operacion:"Mantenimiento",    local:true  },
+    { nombre:"Eduardo Alejandro Alpudia",           operacion:"Mantenimiento",    local:true  },
+  ],
+  embolsado: [
+    { nombre:"Gabriela Hernandez Abreu",    operacion:"Jefe de linea", local:false },
+    { nombre:"Giovanni Javier Perez Perez", operacion:"Estibador",     local:false },
+    { nombre:"Jose Alberto Aguilar Perez",  operacion:"Estibador",     local:false },
+  ],
+  slicer: [],
+  chiles: [],
+  carton: [],
+};
+const AREAS_DEFAULT = [
+  { id:"persa",      nombre:"Persa",      color:COLORES[0], bg:COLORES_BG[0], hayComida:true,  hayCena:false, opsBase:"general",    opsExtra:[] },
+  { id:"slicer",     nombre:"Slicer",     color:COLORES[1], bg:COLORES_BG[1], hayComida:true,  hayCena:false, opsBase:"general",    opsExtra:[] },
+  { id:"chiles",     nombre:"Chiles",     color:COLORES[2], bg:COLORES_BG[2], hayComida:true,  hayCena:false, opsBase:"general",    opsExtra:[] },
+  { id:"euro",       nombre:"Europeos",   color:COLORES[3], bg:COLORES_BG[3], hayComida:true,  hayCena:false, opsBase:"euro_extra", opsExtra:[] },
+  { id:"embolsado",  nombre:"Embolsado",  color:COLORES[4], bg:COLORES_BG[4], hayComida:true,  hayCena:false, opsBase:"embolsado",  opsExtra:[] },
+  { id:"indirectos", nombre:"Indirectos", color:COLORES[6], bg:COLORES_BG[6], hayComida:true,  hayCena:false, opsBase:"indirectos", opsExtra:[] },
+];
+
+// -- Clave PERMANENTE - nunca cambia ------------------------------------------
+const MASTER_KEY = "agro-asistencias-master";
+
+const lsSave = (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+const lsLoad = (k,def) => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):def; }catch(e){ return def; } };
+
+// Guardar todo en un solo objeto maestro
+const saveMaster = (data) => lsSave(MASTER_KEY, data);
+const loadMaster = () => lsLoad(MASTER_KEY, null);
+
+// Todas las claves antiguas de plantilla para recuperar
+const CLAVES_PLT = [
+  "ca-plt-v3","ca-plt-v2","ca-plt-v1",
+  "asis-plt-v7","asis-plt-v6","asis-plt-v5","asis-plt-v4",
+  "asis-plantilla-v4","asis-plantilla-v3","asis-plantilla-v2","asis-plantilla-v1",
+];
+const CLAVES_AREAS = [
+  "ca-areas-v3","ca-areas-v2","ca-areas-v1",
+  "asis-areas-v2","asis-areas-v1",
+];
+const CLAVES_DAT = [
+  "ca-dat-v3","ca-dat-v2","ca-dat-v1",
+  "asis-dat-v7","asis-dat-v6","asis-dat-v5",
+];
+const CLAVES_HIST = [
+  "ca-hist-v3","ca-hist-v2","ca-hist-v1",
+  "asis-hist-v7","asis-hist-v6",
+];
+
+function buscarEnClaves(claves, validar) {
+  let resultado = null;
+  claves.forEach(function(c) {
+    if(resultado) return;
+    try {
+      const raw = localStorage.getItem(c);
+      if(!raw) return;
+      const v = JSON.parse(raw);
+      if(validar(v)) resultado = v;
+    } catch(e){}
+  });
+  return resultado;
+}
+
+// Cargar estado inicial - primero master, luego claves antiguas
+function cargarEstadoInicial() {
+  const master = loadMaster();
+  // Si hay plantilla guardada en localStorage, usarla - NO pisar con el codigo
+  if(master && master.plt && Object.keys(master.plt).length > 0) {
+    return { areas: master.areas||AREAS_DEFAULT, plt: master.plt, dat: master.dat||[], hist: master.hist||[] };
+  }
+  // Solo si no hay nada guardado, usar la plantilla del codigo
+  const pltBase = {};
+  Object.entries(PLANTILLA_FIJA).forEach(([areaId, personas]) => {
+    pltBase[areaId] = personas;
+  });
+  return { areas: AREAS_DEFAULT, plt: pltBase, dat: [], hist: [] };
+}
+
+// Sueldos fijos semanales - costo diario = sueldo / 7, sin extras
+const SUELDOS_FIJOS = {
+  "Xochil Viridiana Limetta Cuero":       4500,
+  "Jose Eduardo Tobias":                  4100,
+  "Bernabe Flores Salazar":               4500,
+  "Cristo Fernando Matamoros Rodriguez":  4000,
+  "Elsa Guadalupe Reyes Amaya":           4250,
+  "Alberto Guadalupe Cruz Hernandez":     4000,
+  "Cesar Ramon Lopez":                    4500,
+  "Luis Bernal":                          4500,
+  "Gabriela Hernandez Abreu":             4000,
+};
+
+const getSueldoFijo = nombre => SUELDOS_FIJOS[nombre] || null;
+const getCostoDiarioFijo = nombre => { const s=getSueldoFijo(nombre); return s?s/7:null; };
+
+const getOpsBase = b => b==="embolsado"?OPS_EMBOLSADO:b==="carton"?OPS_CARTON:b==="indirectos"?OPS_INDIRECTOS:b==="euro_extra"?OPS_EURO_EXTRA:OPS_GENERAL;
+const getOps     = a => [...getOpsBase(a.opsBase||"general"), ...(a.opsExtra||[])];
+const money  = v => "$"+Number(v).toLocaleString("es-MX",{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt1   = v => Number(v).toLocaleString("es-MX",{minimumFractionDigits:1,maximumFractionDigits:1});
+const toMins = str => { if(!str) return null; const [h,m]=str.split(":").map(Number); return h*60+(m||0); };
+const diffMins = (a,b) => { const ma=toMins(a),mb=toMins(b); if(ma===null||mb===null) return 0; return mb<=ma?mb+1440-ma:mb-ma; };
+
+function calcDist(tw, areas) {
+  // Descanso con goce: paga jornal completo sin segmentos
+  if(tw.estado==="descanso_c"){
+    const costoFijo=getCostoDiarioFijo(tw.nombre);
+    const total=costoFijo!==null?costoFijo:SUELDO_DIA;
+    return {distLineas:{[tw.lineaBase]:{frac:1,costo:total,mins:480}},costoTotal:total,horas:8,extras:0,esFijo:costoFijo!==null};
+  }
+  // Falta o descanso sin goce: sin costo
+  if(tw.estado==="falta"||tw.estado==="descanso_s"){
+    return {distLineas:{},costoTotal:0,horas:0,extras:0,esFijo:false};
+  }
+
+  const segs = tw.segmentos||[];
+  if(!segs.length) return {distLineas:{},costoTotal:0,horas:0,extras:0};
+
+  // Si tiene sueldo fijo: costo diario fijo, sin extras
+  const costoFijo = getCostoDiarioFijo(tw.nombre);
+
+  const mpl={};
+  let totalMins=0;
+  segs.forEach(s=>{
+    if(!s.inicio||!s.fin) return;
+    const m=diffMins(s.inicio,s.fin);
+    if(m<=0) return;
+    mpl[s.areaId]=(mpl[s.areaId]||0)+m;
+    totalMins+=m;
+  });
+  if(totalMins<=0) return {distLineas:{},costoTotal:0,horas:0,extras:0};
+
+  const aBase=areas.find(a=>a.id===tw.lineaBase);
+  const minsBase=mpl[tw.lineaBase]||0;
+  const horasBase=minsBase/60;
+  const horasOtras=Object.entries(mpl).filter(([lid])=>lid!==tw.lineaBase).reduce((s,[,m])=>s+m/60,0);
+  let horasEf=horasBase+horasOtras;
+  // Descuento de comida y cena sobre el total efectivo
+  if(aBase?.hayComida) horasEf=Math.max(0,horasEf-1);
+  if(aBase?.hayCena)   horasEf=Math.max(0,horasEf-1);
+  // Horas base corregidas para distribucion proporcional
+  const horasBaseCorr=Math.max(0,horasBase-(aBase?.hayComida?1:0)-(aBase?.hayCena?1:0));
+
+  let total, extras;
+  if(costoFijo!==null){
+    // Sueldo fijo: no genera extras
+    total = costoFijo;
+    extras = 0;
+  } else {
+    extras=Math.max(0,horasEf-HORAS_JORNAL);
+    const base=Math.min(horasEf,HORAS_JORNAL)/HORAS_JORNAL*SUELDO_DIA;
+    total=base+extras*COSTO_HREXT;
+  }
+
+  const minsCor={...mpl,[tw.lineaBase]:horasBaseCorr*60};
+  const totalCor=Object.values(minsCor).reduce((s,m)=>s+m,0);
+  const dl={};
+  Object.entries(minsCor).forEach(([lid,m])=>{
+    const frac=totalCor>0?m/totalCor:0;
+    dl[lid]={frac,costo:frac*total,mins:mpl[lid]||0};
+  });
+  return {distLineas:dl,costoTotal:total,horas:horasEf,extras,esFijo:costoFijo!==null};
+}
+
+// CSS movido al HTML
+
+function TwRow({tw,areas,onUpdSeg,onAusente,onOp,onEstado}){
+  const [open,setOpen]=useState(false);
+  const aBase=areas.find(a=>a.id===tw.lineaBase);
+  const segs=tw.segmentos||[];
+  const ops=aBase?getOps(aBase):[];
+  const {distLineas,costoTotal,horas,extras,esFijo}=calcDist(tw,areas);
+  const segActivo=segs.find(s=>s.inicio&&!s.fin);
+  const areaActual=segActivo?areas.find(a=>a.id===segActivo.areaId):aBase;
+  const estadoTag = tw.estado==="falta"?"FALTA":tw.estado==="descanso_c"?"D.C/GOCE":tw.estado==="descanso_s"?"D.S/GOCE":tw.ausente?"AUSENTE":areaActual?.nombre||"-";
+  const estadoColor = tw.estado==="falta"?"#cc4a4a":tw.estado==="descanso_c"?"#4a7acc":tw.estado==="descanso_s"?"#cc6600":areaActual?.color||"#555";
+  const estadoBg = tw.estado==="falta"?"#1a0d0d":tw.estado==="descanso_c"?"#0d111a":tw.estado==="descanso_s"?"#1a110d":areaActual?.bg||"#141414";
+  return (<>
+    <div className={"tw"+(tw.ausente?" aus":"")} onClick={()=>setOpen(o=>!o)}>
+      <div className="tw-nm">{tw.nombre}{esFijo&&<span style={{fontSize:6,color:"#f0c050",fontWeight:700,marginLeft:4,letterSpacing:1}}>FIJO</span>}</div>
+      <div className="tw-tag" style={{background:estadoBg,color:estadoColor}}>{estadoTag}</div>
+      <div className="tw-cost">{costoTotal>0?money(costoTotal):""}</div>
+      <span className="tw-arr">{open?"^":"v"}</span>
+    </div>
+    {open&&(<div className="tw-det">
+      {horas>0&&(<div style={{background:"#1a1a1a",border:"1px solid #2a2a2a",borderRadius:3,padding:"6px 8px",marginBottom:8,fontSize:8}}>
+        <div style={{color:"#555",marginBottom:4,fontSize:7,letterSpacing:1,textTransform:"uppercase"}}>Desglose</div>
+        {segs.filter(s=>s.inicio&&s.fin).map((s,i)=>{
+          const lS=areas.find(a=>a.id===s.areaId);
+          return (<div key={i} style={{display:"flex",gap:6,alignItems:"center",marginBottom:3}}>
+            <div className="dot" style={{background:lS?.color||"#555"}}/>
+            <span style={{color:lS?.color,fontWeight:700,minWidth:65}}>{lS?.nombre}</span>
+            <span style={{color:"#888"}}>{s.inicio}{" > "}{s.fin}</span>
+            <span style={{color:"#e0dcd4",fontWeight:700,marginLeft:"auto"}}>{fmt1(diffMins(s.inicio,s.fin)/60)}h</span>
+          </div>);
+        })}
+        <div style={{borderTop:"1px solid #2a2a2a",marginTop:4,paddingTop:4}}>
+          {aBase?.hayComida&&<div style={{color:"#f08060",fontSize:8}}>- 1h comida</div>}
+          {aBase?.hayCena&&<div style={{color:"#f08060",fontSize:8}}>- 1h cena</div>}
+          {esFijo
+            ?<div style={{color:"#f0c050",fontWeight:700,marginTop:3}}>Sueldo fijo: {money(getCostoDiarioFijo(tw.nombre))}/dia . Sin extras</div>
+            :<div style={{color:"#a8e063",fontWeight:700,marginTop:3}}>{fmt1(horas)}h efectivas . {money(costoTotal)}</div>
+          }
+          {!esFijo&&extras>0&&<div style={{color:"#f0c050",fontSize:8}}>{fmt1(extras)}h extra x $50 = {money(extras*50)}</div>}
+        </div>
+      </div>)}
+      {Object.keys(distLineas).length>0&&costoTotal>0&&(<div className="dist">
+        {Object.entries(distLineas).filter(([,d])=>d.frac>0).map(([lid,d])=>{
+          const lD=areas.find(a=>a.id===lid);
+          return (<div className="dist-r" key={lid}>
+            <div className="dnm" style={{color:lD?.color}}>{lD?.nombre||lid}</div>
+            <div className="bw"><div className="bf" style={{width:(d.frac*100)+"%",background:lD?.color}}/></div>
+            <div className="dc">{money(d.costo)}</div>
+          </div>);
+        })}
+      </div>)}
+      <div style={{marginBottom:8}}>
+        <span className="fl">Operacion</span>
+        <select className="fi" value={tw.operacion||""} onChange={e=>onOp(e.target.value)}>
+          <option value="">- Sin asignar -</option>
+          {ops.map(op=><option key={op} value={op}>{op}</option>)}
+        </select>
+      </div>
+      {segs.map((s,i)=>{
+        const lS=areas.find(a=>a.id===s.areaId);
+        const hrs=s.inicio&&s.fin?diffMins(s.inicio,s.fin)/60:0;
+        return (<div className="pc" key={i}>
+          <div className="phd">
+            <div className="dot" style={{background:lS?.color||"#555"}}/>
+            <select value={s.areaId} onChange={e=>onUpdSeg(i,"areaId",e.target.value)}
+              style={{flex:1,border:"none",background:"transparent",fontFamily:"'IBM Plex Mono',monospace",fontSize:10,fontWeight:700,color:lS?.color||"#888",outline:"none"}}>
+              {areas.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}
+            </select>
+            {hrs>0&&<span style={{fontSize:8,color:"#a8e063",fontWeight:700}}>{fmt1(hrs)}h</span>}
+          </div>
+          <div className="pgrid">
+            <div><div className="plbl">Inicio</div><input className="pinp" type="time" value={s.inicio||""} onChange={e=>onUpdSeg(i,"inicio",e.target.value)}/></div>
+            <div><div className="plbl">Fin</div><input className="pinp" type="time" value={s.fin||""} onChange={e=>onUpdSeg(i,"fin",e.target.value)}/></div>
+            <div style={{paddingBottom:2}}><button className="bx" style={{fontSize:16}} onClick={()=>onUpdSeg(i,"borrar",null)}>x</button></div>
+          </div>
+        </div>);
+      })}
+      {(<div style={{display:"flex",gap:4,marginTop:4,flexWrap:"wrap"}}>
+        <button onClick={()=>onUpdSeg(segs.length,"agregar",{areaId:tw.lineaBase,inicio:"",fin:""})}
+          style={{flex:2,padding:"5px",border:"1.5px solid #2d8a2d",borderRadius:3,background:"transparent",fontFamily:"'IBM Plex Mono',monospace",fontSize:8,fontWeight:700,cursor:"pointer",color:"#2d8a2d",letterSpacing:1}}>
+          + Segmento
+        </button>
+        {[
+          ["presente",   "v Presente",    "#2d8a2d","#0d1a0d"],
+          ["descanso_c", " D. c/goce",  "#4a7acc","#0d111a"],
+          ["falta",      "x Falta",       "#cc4a4a","#1a0d0d"],
+          ["descanso_s", "[!] D. s/goce",  "#cc6600","#1a110d"],
+        ].map(([estado,lbl,color,bg])=>(
+          <button key={estado} onClick={()=>onEstado(estado===tw.estado?null:estado)}
+            style={{flex:1,padding:"4px 3px",border:"1.5px solid "+(tw.estado===estado?color:"#2a2a2a"),borderRadius:3,
+              background:tw.estado===estado?bg:"transparent",fontFamily:"'IBM Plex Mono',monospace",
+              fontSize:7,fontWeight:700,cursor:"pointer",color:tw.estado===estado?color:"#444",whiteSpace:"nowrap"}}>
+            {lbl}
+          </button>
+        ))}
+      </div>)}
+    </div>)}
+  </>);
+}
+
+function HistCard({h, areas}){
+  const [open, setOpen] = useState(false);
+  const [nomina, setNomina] = useState(false);
+
+  return (<>
+    {/* Vista nomina imprimible */}
+    {nomina&&(
+      <div style={{position:"fixed",inset:0,background:"#fff",zIndex:1000,overflowY:"auto",fontFamily:"'IBM Plex Mono',monospace",color:"#111"}}>
+
+        {/* Barra de control - no se imprime */}
+        <div className="no-print" style={{background:"#111",padding:"10px 20px",display:"flex",justifyContent:"space-between",alignItems:"center",position:"sticky",top:0,zIndex:10}}>
+          <span style={{color:"#a8e063",fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2}}>NOMINA - {h.fechaDia||h.fecha}</span>
+          <div style={{display:"flex",gap:10}}>
+            <button onClick={()=>window.print()}
+              style={{padding:"8px 18px",background:"#a8e063",border:"none",borderRadius:4,
+                fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:700,color:"#080808",cursor:"pointer",letterSpacing:1}}>
+               Imprimir / PDF
+            </button>
+            <button onClick={()=>setNomina(false)}
+              style={{padding:"8px 14px",border:"1.5px solid #444",borderRadius:4,background:"transparent",
+                fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:700,cursor:"pointer",color:"#aaa"}}>
+              x Cerrar
+            </button>
+          </div>
+        </div>
+
+        {/* Paginas - por area, locales y foraneos separados */}
+        {(()=>{
+          const esLocal = (nombre) => {
+            let resultado = false;
+            Object.values(PLANTILLA_FIJA).forEach(function(personas) {
+              if(resultado !== false) return;
+              const p = personas.find(x=>x.nombre===nombre);
+              if(p) resultado = p.local===true;
+            });
+            return resultado === false ? false : resultado;
+          };
+
+          const PaginaNomina = ({personas, titulo, subtitulo, fecha}) => {
+            if(!personas.length) return null;
+            const total = personas.reduce((s,p)=>s+p.costoTotalDia,0);
+            return (
+              <div style={{width:"21.59cm",minHeight:"27.94cm",margin:"0 auto",padding:"1.5cm",pageBreakAfter:"always",background:"#fff",display:"flex",flexDirection:"column"}}>
+                <div style={{borderBottom:"2px solid #111",paddingBottom:"8px",marginBottom:"14px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                    <div>
+                      <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:"28px",letterSpacing:"3px",color:"#111",lineHeight:1}}>PARRAS VALLEY</div>
+                      <div style={{fontSize:"10px",letterSpacing:"2px",textTransform:"uppercase",color:"#555",marginTop:"3px"}}>Nomina . {fecha}</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:"22px",letterSpacing:"2px",color:"#111"}}>{titulo}</div>
+                      <div style={{fontSize:"11px",color:"#555"}}>{subtitulo} . {personas.length} personas . {money(total)}</div>
+                    </div>
+                  </div>
+                </div>
+                <table style={{width:"100%",borderCollapse:"collapse",fontSize:"11px",flex:1}}>
+                  <thead>
+                    <tr style={{background:"#f0f0f0"}}>
+                      <th style={{padding:"6px 8px",textAlign:"left",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase"}}>#</th>
+                      <th style={{padding:"6px 8px",textAlign:"left",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase"}}>Nombre</th>
+                      <th style={{padding:"6px 8px",textAlign:"left",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase"}}>Operacion</th>
+                      <th style={{padding:"6px 8px",textAlign:"right",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase"}}>Hrs</th>
+                      <th style={{padding:"6px 8px",textAlign:"right",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase"}}>Total dia</th>
+                      <th style={{padding:"6px 8px",textAlign:"center",borderBottom:"2px solid #999",color:"#111",fontSize:"10px",textTransform:"uppercase",width:"80px"}}>Firma</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {personas.map((p,j)=>(
+                      <tr key={j} style={{borderBottom:"1px solid #ddd",background:j%2===0?"#fff":"#fafafa"}}>
+                        <td style={{padding:"7px 8px",color:"#999",fontSize:"10px"}}>{String(j+1).padStart(2,"0")}</td>
+                        <td style={{padding:"7px 8px",fontWeight:"700",color:"#111",fontSize:"11px"}}>{p.nombre}</td>
+                        <td style={{padding:"7px 8px",color:"#555",fontSize:"10px"}}>{p.operacion||"-"}</td>
+                        <td style={{padding:"7px 8px",textAlign:"right",fontSize:"11px"}}>{fmt1(p.horas)}h</td>
+                        <td style={{padding:"7px 8px",textAlign:"right",fontWeight:"700",color:"#1a5c1a",fontSize:"12px"}}>{money(p.costoTotalDia)}</td>
+                        <td style={{padding:"7px 8px",borderLeft:"1px solid #ddd"}}></td>
+                      </tr>
+                    ))}
+                    <tr style={{borderTop:"2px solid #888",background:"#ebebeb"}}>
+                      <td colSpan="4" style={{padding:"8px",fontWeight:"700",fontSize:"12px"}}>TOTAL</td>
+                      <td style={{padding:"8px",textAlign:"right",fontWeight:"700",color:"#1a5c1a",fontSize:"13px"}}>{money(total)}</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style={{marginTop:"auto",paddingTop:"20px",borderTop:"1px solid #ccc"}}>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"20px",fontSize:"10px",color:"#777"}}>
+                    <div><div style={{borderTop:"1px solid #999",paddingTop:"5px",marginTop:"24px"}}>Elaboro</div></div>
+                    <div><div style={{borderTop:"1px solid #999",paddingTop:"5px",marginTop:"24px"}}>Reviso</div></div>
+                    <div><div style={{borderTop:"1px solid #999",paddingTop:"5px",marginTop:"24px"}}>Autorizo</div></div>
+                  </div>
+                  <div style={{marginTop:"10px",fontSize:"9px",color:"#bbb",textAlign:"right"}}>
+                    Parras Valley . {fecha} . Sistema de Control
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          const fecha = h.fechaDia||h.fecha;
+          return (h.resAreas||[]).filter(a=>a.costoTotal>0).map(a=>{
+            const locales  = (a.personas||[]).filter(p=>esLocal(p.nombre));
+            const foraneos = (a.personas||[]).filter(p=>!esLocal(p.nombre));
+            return (<React.Fragment key={a.id}>
+              <PaginaNomina personas={locales}  titulo={a.nombre+" - Local"}   subtitulo="Personal Local"   fecha={fecha}/>
+              <PaginaNomina personas={foraneos} titulo={a.nombre+" - Foraneo"} subtitulo="Personal Foraneo" fecha={fecha}/>
+            </React.Fragment>);
+          });
+        })()}
+
+      </div>
+    )}
+
+    {/* Tarjeta de historial */}
+    <div className="hcard">
+      <div className="hhd" style={{cursor:"pointer"}} onClick={()=>setOpen(o=>!o)}>
+        <span className="hfecha">{h.fechaDia||h.fecha}</span>
+        <span style={{fontSize:11,color:"#8899bb"}}>{h.presentes} personas</span>
+        <span style={{fontSize:14,fontWeight:700,color:"#a8e063",marginLeft:"auto"}}>{money(h.totalPlanta||0)}</span>
+        <span style={{color:"#555",marginLeft:8,fontSize:12}}>{open?"^":"v"}</span>
+      </div>
+
+      {open&&(
+        <div className="hbd">
+          {/* Boton nomina */}
+          <button onClick={()=>setNomina(true)}
+            style={{width:"100%",padding:"8px",background:"#1a3a1a",border:"1.5px solid #2d8a2d",borderRadius:4,
+              fontFamily:"'IBM Plex Mono',monospace",fontSize:10,fontWeight:700,color:"#a8e063",cursor:"pointer",letterSpacing:1,marginBottom:10}}>
+             Ver nomina imprimible de este dia
+          </button>
+
+          {/* Detalle por area */}
+          {(h.resAreas||[]).filter(a=>a.costoTotal>0).map(a=>(
+            <div key={a.id} style={{marginBottom:8}}>
+              <div style={{background:a.color||"#333",color:"#fff",padding:"3px 8px",fontWeight:700,fontSize:11,display:"flex",justifyContent:"space-between",borderRadius:"3px 3px 0 0"}}>
+                <span>{a.nombre}</span><span>{money(a.costoTotal)}</span>
+              </div>
+              {(a.personas||[]).map((p,j)=>(
+                <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:10,padding:"4px 8px",borderBottom:"1px solid #0e0e0e",background:j%2===0?"#111":"#0e0e0e"}}>
+                  <span style={{color:p.esBase?"#ccc":"#4a7acc",flex:1}}>{p.nombre.split(" ").slice(0,2).join(" ")}{!p.esBase?" (ext)":""}</span>
+                  <span style={{color:"#666",margin:"0 8px"}}>{fmt1(p.horas)}h</span>
+                  <span style={{color:"#888",margin:"0 8px"}}>{money(p.costoEnArea)}</span>
+                  <span style={{fontWeight:700,color:"#a8e063"}}>{money(p.costoTotalDia)}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+          {h.fijosPresentes?.length>0&&(
+            <div style={{marginBottom:8}}>
+              <div style={{background:"#cc8a00",color:"#fff",padding:"3px 8px",fontWeight:700,fontSize:11,display:"flex",justifyContent:"space-between",borderRadius:"3px 3px 0 0"}}>
+                <span>Sueldo Fijo</span><span>{money(h.totalFijos||0)}</span>
+              </div>
+              {h.fijosPresentes.map((f,j)=>(
+                <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:10,padding:"4px 8px",borderBottom:"1px solid #0e0e0e",background:j%2===0?"#111":"#0e0e0e"}}>
+                  <span style={{color:"#ccc",flex:1}}>{f.nombre.split(" ").slice(0,2).join(" ")}</span>
+                  <span style={{fontWeight:700,color:"#a8e063"}}>{money(f.costoDia)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {h.ausentes?.length>0&&<div style={{fontSize:9,color:"#555",marginTop:4}}>Ausentes: {h.ausentes.join(", ")}</div>}
+        </div>
+      )}
+    </div>
+  </>);
+}
+
+function App(){
+  // Cargar estado inicial UNA sola vez
+  const [estado] = useState(cargarEstadoInicial);
+  const [areas, setAreas] = useState(()=>{
+    const est = cargarEstadoInicial();
+    // Asegurar que Indirectos siempre tenga opsBase correcto
+    const areasBase = est.areas || AREAS_DEFAULT;
+    const tieneIndirectos = areasBase.some(a=>a.id==="indirectos");
+    if(!tieneIndirectos) {
+      return [...areasBase, { id:"indirectos", nombre:"Indirectos", color:COLORES[6], bg:COLORES_BG[6], hayComida:true, hayCena:false, opsBase:"indirectos", opsExtra:[] }];
+    }
+    return areasBase.map(a=>a.id==="indirectos"?{...a,opsBase:"indirectos"}:a);
+  });
+  const [plantilla, setPlantilla] = useState(()=>{
+    const guardada = estado.plt || {};
+    const fusionada = {...guardada};
+    Object.entries(PLANTILLA_FIJA).forEach(([areaId, personas]) => {
+      const existentes = [...(fusionada[areaId] || [])];
+      const nuevas = [];
+      personas.forEach(p => {
+        const idx = existentes.findIndex(x => (x.nombre||x) === p.nombre);
+        if(idx === -1) {
+          nuevas.push(p);
+        } else if(!existentes[idx].operacion && p.operacion) {
+          existentes[idx] = {...existentes[idx], operacion: p.operacion};
+        }
+      });
+      fusionada[areaId] = [...existentes, ...nuevas];
+    });
+    // Guardar inmediatamente en localStorage
+    try {
+      const master = JSON.parse(localStorage.getItem(MASTER_KEY)||'{}');
+      master.plt = fusionada;
+      localStorage.setItem(MASTER_KEY, JSON.stringify(master));
+    } catch(e) {}
+    return fusionada;
+  });
+  const [asistencias, setAsist]      = useState(()=>estado.dat||[]);
+  const [historial,   setHist]       = useState(()=>estado.hist||[]);
+  const [extras,      setExtras]     = useState(()=>lsLoad("ca-extras-v1",{})); // {areaId: {cenas:0, bultos:0}}
+  const PRECIO_CENA = 55;
+  const saveExtras = v => { setExtras(v); lsSave("ca-extras-v1",v); };
+  const [tab,         setTab]        = useState("areas");
+  const [inputs,      setInputs]     = useState({});
+  const [opInputs,    setOpInputs]   = useState({});
+  const [openArea,    setOpenArea]   = useState(null);
+  const [openPlt,     setOpenPlt]    = useState(null);
+  const [nuevoArea,   setNuevoArea]  = useState("");
+  const [opExtraInp,  setOpExtraInp] = useState({});
+  const [selGrupo,    setSelGrupo]   = useState([]);
+  const [movLineaId,  setMovLineaId] = useState(null);
+  const [movSegs,     setMovSegs]    = useState([]);
+  const [vistaRep,    setVistaRep]   = useState(null);
+  const [arranqueHoras, setArranqueHoras] = useState({});
+  const [busqueda,      setBusqueda]      = useState("");
+  const [fechaDia,      setFechaDia]      = useState(()=>lsLoad("ca-fecha-v1", new Date().toLocaleDateString("es-MX",{day:"2-digit",month:"2-digit",year:"numeric"})));
+  const saveFecha = v => { setFechaDia(v); lsSave("ca-fecha-v1",v); };
+  const [confirmDelArea,  setConfirmDelArea]  = useState(null);
+  const [confirmNuevoDia, setConfirmNuevoDia] = useState(false);
+  const [confirmDelHist,  setConfirmDelHist]  = useState(false);
+
+  // Guardar TODO en master - siempre con valores mas recientes
+  const guardarTodo = (a,p,d,h) => saveMaster({areas:a,plt:p,dat:d,hist:h});
+
+  const saveAreas = v => { setAreas(v);  lsSave(MASTER_KEY, {...loadMaster()||{}, areas:v}); };
+  const savePlt   = v => { setPlantilla(v); lsSave(MASTER_KEY, {...loadMaster()||{}, plt:v}); };
+  const saveAsist = v => { setAsist(v);  lsSave(MASTER_KEY, {...loadMaster()||{}, dat:v}); };
+  const saveHist  = v => { setHist(v);   lsSave(MASTER_KEY, {...loadMaster()||{}, hist:v}); };
+
+  // Guardar areas corregidas al arrancar (fuerza Indirectos con opsBase correcto)
+  useEffect(()=>{ guardarTodo(areas,plantilla,asistencias,historial); },[]);
+
+  // Sincronizar plantilla con areas
+  useEffect(()=>{
+    const np={...plantilla}; let c=false;
+    areas.forEach(a=>{if(!np[a.id]){np[a.id]=[];c=true;}});
+    if(c) savePlt(np);
+  },[areas]);
+
+  // Areas
+  const updArea=(id,k,v)=>saveAreas(areas.map(a=>a.id===id?{...a,[k]:v}:a));
+  const addOpExtra=(id,op)=>{if(!op.trim()) return; const a=areas.find(x=>x.id===id); if(!a||a.opsExtra.includes(op.trim())) return; updArea(id,"opsExtra",[...a.opsExtra,op.trim()]); setOpExtraInp(x=>({...x,[id]:""}));};
+  const delOpExtra=(id,op)=>{const a=areas.find(x=>x.id===id); if(a) updArea(id,"opsExtra",a.opsExtra.filter(o=>o!==op));};
+  const confirmarDelArea=()=>{saveAreas(areas.filter(a=>a.id!==confirmDelArea));setConfirmDelArea(null);setOpenArea(null);};
+  const addArea=()=>{
+    if(!nuevoArea.trim()) return;
+    const idx=areas.length%COLORES.length, id="area_"+Date.now();
+    saveAreas([...areas,{id,nombre:nuevoArea.trim(),color:COLORES[idx],bg:COLORES_BG[idx],hayComida:true,hayCena:false,opsBase:"general",opsExtra:[]}]);
+    setNuevoArea("");
+  };
+
+  // Plantilla
+  const addNombre=lid=>{
+    const nm=(inputs[lid]||"").trim();
+    if(!nm||(plantilla[lid]||[]).some(p=>(p.nombre||p)===nm)) return;
+    savePlt({...plantilla,[lid]:[...(plantilla[lid]||[]),{nombre:nm,operacion:opInputs[lid]||""}]});
+    setInputs(i=>({...i,[lid]:""})); setOpInputs(i=>({...i,[lid]:""}));
+  };
+  const delNombre=(lid,nm)=>savePlt({...plantilla,[lid]:(plantilla[lid]||[]).filter(p=>(p.nombre||p)!==nm)});
+  const updOpPlt=(lid,nm,op)=>savePlt({...plantilla,[lid]:(plantilla[lid]||[]).map(p=>(p.nombre||p)===nm?{nombre:nm,operacion:op}:p)});
+
+  const iniciarDia=()=>{
+    const nuevas=[];
+    areas.forEach(a=>{(plantilla[a.id]||[]).forEach(p=>{
+      nuevas.push({id:Date.now()+Math.random(),nombre:p.nombre||p,lineaBase:a.id,ausente:false,operacion:p.operacion||"",segmentos:[{areaId:a.id,inicio:"",fin:""}]});
+    });});
+    saveAsist(nuevas); setTab("asistencia");
+  };
+
+  const iniciarLinea=(areaId, horaInicio)=>{
+    const enPlt = plantilla[areaId]||[];
+    if(!enPlt.length) return;
+    const nombresFijos = new Set(Object.keys(SUELDOS_FIJOS));
+    const yaExisten = new Set(asistencias.map(tw=>tw.nombre));
+    const nuevas=[...asistencias];
+    enPlt.forEach(p=>{
+      const nm=p.nombre||p;
+      // Saltar solo los de sueldo fijo explicito
+      if(nombresFijos.has(nm)) return;
+      if(yaExisten.has(nm)){
+        const idx=nuevas.findIndex(tw=>tw.nombre===nm);
+        if(idx>=0){
+          nuevas[idx]={...nuevas[idx], arrancado:true};
+          if(horaInicio){
+            const segs=[...(nuevas[idx].segmentos||[])];
+            if(segs.length>0 && !segs[0].inicio) segs[0]={...segs[0],inicio:horaInicio};
+            else if(segs.length===0) segs.push({areaId,inicio:horaInicio,fin:""});
+            nuevas[idx]={...nuevas[idx],segmentos:segs};
+          }
+        }
+      } else {
+        nuevas.push({id:Date.now()+Math.random(),nombre:nm,lineaBase:areaId,ausente:false,
+          arrancado:true, marcado:false,
+          operacion:p.operacion||"",
+          segmentos:[{areaId,inicio:horaInicio||"",fin:""}]});
+      }
+    });
+    saveAsist(nuevas);
+  };
+
+  // Asistencia
+  const updSeg=(id,idx,campo,val)=>saveAsist(asistencias.map(tw=>{
+    if(tw.id!==id) return tw;
+    const ss=[...(tw.segmentos||[])];
+    if(campo==="borrar") ss.splice(idx,1);
+    else if(campo==="agregar") ss.push(val);
+    else ss[idx]={...ss[idx],[campo]:val};
+    return {...tw,segmentos:ss};
+  }));
+  const ausente=id=>saveAsist(asistencias.map(tw=>tw.id!==id?tw:{...tw,ausente:true}));
+  const setOp=(id,op)=>saveAsist(asistencias.map(tw=>tw.id!==id?tw:{...tw,operacion:op}));
+
+  const abrirMovLinea=areaId=>{setMovLineaId(areaId);setMovSegs([{areaId,inicio:"",fin:""}]);};
+  const aplicarMovimiento=()=>{
+    const ids=asistencias.filter(tw=>tw.lineaBase===movLineaId&&!tw.ausente).map(tw=>tw.id);
+    saveAsist(asistencias.map(tw=>ids.includes(tw.id)?{...tw,segmentos:[...movSegs]}:tw));
+    setMovLineaId(null); setMovSegs([]);
+  };
+  const moverGrupo=lid=>{
+    if(!selGrupo.length) return;
+    saveAsist(asistencias.map(tw=>selGrupo.includes(tw.id)?{...tw,segmentos:[...(tw.segmentos||[]),{areaId:lid,inicio:"",fin:""}]}:tw));
+    setSelGrupo([]);
+  };
+
+  // Historial
+  const guardarHist=asis=>{
+    if(!asis.length) return;
+    const fecha=new Date().toLocaleDateString("es-MX",{weekday:"short",day:"2-digit",month:"short",year:"numeric"});
+    const resAreas=areas.map(a=>{
+      let costoTotal=0; const opsCount={}; const personas=[];
+      asis.filter(tw=>!tw.ausente).forEach(tw=>{
+        const {distLineas,horas:ht,extras,esFijo,costoTotal:costoTotalTw}=calcDist(tw,areas);
+        if(distLineas[a.id]&&distLineas[a.id].mins>0){
+          costoTotal+=distLineas[a.id].costo;
+          personas.push({
+            nombre:tw.nombre,operacion:tw.operacion||"-",
+            esBase:tw.lineaBase===a.id,
+            horas:distLineas[a.id].frac*(ht||0),
+            costoEnArea:distLineas[a.id].costo,
+            costoTotalDia:costoTotalTw,
+            extras,esFijo
+          });
+        }
+        if(tw.lineaBase===a.id&&tw.operacion) opsCount[tw.operacion]=(opsCount[tw.operacion]||0)+1;
+      });
+      return {id:a.id,nombre:a.nombre,color:a.color,costoTotal,opsCount,personas};
+    });
+    const fijosPresentes=Object.entries(SUELDOS_FIJOS)
+      .filter(([nm])=>asis.some(tw=>tw.nombre===nm&&tw.marcado&&!tw.ausente))
+      .map(([nm,s])=>({nombre:nm,costoDia:s/7}));
+    const snap={
+      fecha, fechaDia:fechaDia||fecha,
+      resAreas,
+      totalPlanta:resAreas.reduce((s,a)=>s+a.costoTotal,0),
+      presentes:asis.filter(tw=>!tw.ausente).length,
+      ausentes:asis.filter(tw=>tw.ausente).map(tw=>tw.nombre),
+      fijosPresentes,
+      totalFijos:fijosPresentes.reduce((s,f)=>s+f.costoDia,0)
+    };
+    saveHist([snap,...historial].slice(0,60));
+  };
+  const confirmarNuevoDia=()=>{
+    guardarHist(asistencias);
+    const resetadas = asistencias.map(tw=>({
+      id: tw.id,
+      nombre: tw.nombre,
+      lineaBase: tw.lineaBase,
+      operacion: tw.operacion,
+      ausente: false,
+      marcado: false,
+      arrancado: false,
+      estado: null,
+      segmentos: []
+    }));
+    saveAsist(resetadas);
+    saveFecha("");
+    setArranqueHoras({});
+    setConfirmNuevoDia(false);
+    setTab("plantilla");
+  };
+
+  // Resumen
+  const resumen=areas.map(a=>{
+    let costoTotal=0; const opsCount={}; let personasEnArea=0;
+    asistencias.filter(tw=>!tw.ausente).forEach(tw=>{
+      const {distLineas}=calcDist(tw,areas);
+      if(distLineas[a.id]&&distLineas[a.id].mins>0){costoTotal+=distLineas[a.id].costo;personasEnArea++;}
+      if(tw.lineaBase===a.id&&tw.operacion) opsCount[tw.operacion]=(opsCount[tw.operacion]||0)+1;
+    });
+    return {...a,costoTotal,opsCount,personasEnArea};
+  });
+  const totalPlanta=resumen.reduce((s,a)=>s+a.costoTotal,0);
+  const presentes=asistencias.filter(tw=>!tw.ausente).length;
+  const ausentes=asistencias.filter(tw=>tw.ausente).map(tw=>tw.nombre);
+  const activos=asistencias.filter(tw=>!tw.ausente);
+  const fechaHoy=new Date().toLocaleDateString("es-MX",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+
+  // -- Vista reporte ---------------------------------------------------------
+  if(vistaRep){
+    const th={padding:"4px 7px",textAlign:"left",borderBottom:"1px solid #ccc",fontSize:9,background:"#f5f5f5"};
+    const thR={padding:"4px 7px",textAlign:"right",borderBottom:"1px solid #ccc",fontSize:9,background:"#f5f5f5"};
+    const td={padding:"3px 7px",borderBottom:"1px solid #eee"};
+    const tdR={padding:"3px 7px",borderBottom:"1px solid #eee",textAlign:"right"};
+
+    return (
+      <div style={{background:"#fff",color:"#111",fontFamily:"Arial,sans-serif",fontSize:11,padding:16,minHeight:"100vh"}}>
+        <div style={{background:"#e8f5e9",border:"1px solid #4caf50",borderRadius:4,padding:"8px 10px",marginBottom:14,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:10}}><b> Compartir:</b> Safari > compartir > Guardar PDF</span>
+          <button onClick={()=>setVistaRep(null)} style={{background:"#111",color:"#fff",border:"none",borderRadius:3,padding:"4px 12px",fontSize:10,cursor:"pointer",fontFamily:"inherit",marginLeft:8}}>x Cerrar</button>
+        </div>
+
+        <div style={{borderBottom:"2px solid #111",paddingBottom:6,marginBottom:14}}>
+          <div style={{fontWeight:700,fontSize:16,letterSpacing:1}}>
+            {vistaRep==="areas" && "CONFIGURACION DE AREAS"}
+            {vistaRep==="plantilla" && ("PLANTILLA"+(openPlt?" - "+(areas.find(a=>a.id===openPlt)?.nombre||"").toUpperCase():""))}
+            {vistaRep==="asistencia" && "ASISTENCIAS DEL DIA"}
+            {vistaRep==="resumen" && "RESUMEN GENERAL DE COSTOS"}
+            {vistaRep==="historial" && "HISTORIAL DE DIAS"}
+            {vistaRep==="grupo" && "GRUPOS"}
+          </div>
+          <div style={{fontSize:10,color:"#666",marginTop:2}}>{fechaHoy}</div>
+        </div>
+
+        {vistaRep==="areas" && areas.map(a=>(
+          <div key={a.id} style={{marginBottom:12,border:"1px solid #ddd",borderRadius:4,overflow:"hidden"}}>
+            <div style={{background:"#111",color:"#fff",padding:"5px 10px",fontWeight:700,fontSize:13}}>{a.nombre}</div>
+            <div style={{padding:"7px 10px"}}>
+              <div>Comida: <b>{a.hayComida?"Si":"No"}</b> . Cena: <b>{a.hayCena?"Si":"No"}</b></div>
+              <div style={{marginTop:4,color:"#555",fontSize:10}}>Operaciones: {getOps(a).join(", ")}</div>
+            </div>
+          </div>
+        ))}
+
+        {vistaRep==="plantilla" && (openPlt?[areas.find(a=>a.id===openPlt)]:areas).filter(Boolean).map(a=>{
+          const pers=plantilla[a.id]||[];
+          return (<div key={a.id} style={{marginBottom:18}}>
+            <div style={{background:"#111",color:"#fff",padding:"5px 8px",fontWeight:700,fontSize:13,letterSpacing:1}}>{a.nombre.toUpperCase()}</div>
+            <table style={{width:"100%",borderCollapse:"collapse",fontSize:11}}>
+              <thead><tr><th style={th}>#</th><th style={th}>Nombre</th><th style={th}>Operacion</th></tr></thead>
+              <tbody>
+                {pers.map((p,i)=>(<tr key={i}><td style={td}>{i+1}</td><td style={{...td,fontWeight:600}}>{p.nombre||p}</td><td style={{...td,color:"#555"}}>{p.operacion||"-"}</td></tr>))}
+                {!pers.length&&<tr><td colSpan="3" style={{...td,textAlign:"center",color:"#999"}}>Sin personal</td></tr>}
+              </tbody>
+            </table>
+            <div style={{fontSize:10,color:"#666",marginTop:3}}>Total: {pers.length} personas</div>
+          </div>);
+        })}
+
+        {vistaRep==="asistencia" && (<>
+          <div style={{background:"#111",color:"#fff",padding:"4px 8px",borderRadius:4,marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div>
+              <div style={{fontWeight:700,fontSize:11,letterSpacing:1}}>NOMINA DEL DIA</div>
+              <div style={{fontSize:8,color:"#aaa"}}>{fechaDia||fechaHoy}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontSize:14,fontWeight:700,color:"#a8e063"}}>{money(totalPlanta)}</div>
+              <div style={{fontSize:8,color:"#aaa"}}>{presentes} personas</div>
+            </div>
+          </div>
+
+          {resumen.filter(a=>a.costoTotal>0).map(a=>{
+            const pData=asistencias.filter(tw=>!tw.ausente).map(tw=>{
+              const {distLineas,horas:ht,extras,esFijo,costoTotal:costoTotalTw}=calcDist(tw,areas);
+              const d=distLineas[a.id]; if(!d||d.mins<=0) return null;
+              return {
+                nombre:tw.nombre,
+                esBase:tw.lineaBase===a.id,
+                horas:d.frac*(ht||0),
+                costoEnArea:d.costo,
+                costoTotalDia:costoTotalTw,
+                extras,esFijo,
+                op:tw.operacion||"-"
+              };
+            }).filter(Boolean);
+            const totalH=pData.reduce((s,p)=>s+p.horas,0);
+            return (<div key={a.id} style={{marginBottom:5,border:"1.5px solid "+(a.color||"#333"),borderRadius:3,overflow:"hidden",minHeight:"85vh",display:"flex",flexDirection:"column"}}>
+              <div style={{background:a.color||"#333",color:"#fff",padding:"3px 6px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontWeight:700,fontSize:10,letterSpacing:1}}>{a.nombre.toUpperCase()} . {pData.length} pers</span>
+                <span style={{fontWeight:700,fontSize:10}}>{money(a.costoTotal)}</span>
+              </div>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:8,flex:1}}>
+                <thead>
+                  <tr style={{background:"#f5f5f5"}}>
+                    <th style={{padding:"2px 4px",textAlign:"left",fontSize:7,borderBottom:"1px solid #ddd"}}>Nombre</th>
+                    <th style={{padding:"2px 4px",textAlign:"right",fontSize:7,borderBottom:"1px solid #ddd"}}>Hrs</th>
+                    <th style={{padding:"2px 4px",textAlign:"right",fontSize:7,borderBottom:"1px solid #ddd"}}>En area</th>
+                    <th style={{padding:"2px 4px",textAlign:"right",fontSize:7,borderBottom:"1px solid #ddd"}}>Total dia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pData.map((p,i)=>(
+                    <tr key={i} style={{borderBottom:"1px solid #f0f0f0",background:i%2===0?"#fff":"#fafafa"}}>
+                      <td style={{padding:"2px 4px",fontSize:8,color:p.esBase?"#111":"#4a7acc"}}>
+                        {p.nombre.split(" ").slice(0,2).join(" ")}{!p.esBase?" (ext)":""}{p.esFijo?" ":""}
+                      </td>
+                      <td style={{padding:"2px 4px",textAlign:"right",fontSize:8}}>{fmt1(p.horas)}</td>
+                      <td style={{padding:"2px 4px",textAlign:"right",fontSize:8,color:"#666"}}>{money(p.costoEnArea)}</td>
+                      <td style={{padding:"2px 4px",textAlign:"right",fontWeight:700,fontSize:8,color:"#2d6a2d"}}>{money(p.costoTotalDia)}</td>
+                    </tr>
+                  ))}
+                  <tr style={{background:"#f0f0f0",fontWeight:700,borderTop:"1px solid #ccc"}}>
+                    <td style={{padding:"2px 4px",fontSize:8}}>TOTAL {a.nombre}</td>
+                    <td style={{padding:"2px 4px",textAlign:"right",fontSize:8}}>{fmt1(totalH)}</td>
+                    <td style={{padding:"2px 4px",textAlign:"right",fontSize:8,color:"#2d6a2d"}}>{money(a.costoTotal)}</td>
+                    <td style={{padding:"2px 4px"}}></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>);
+          })}
+
+          {(()=>{
+            const fijosPresentes=Object.entries(SUELDOS_FIJOS).filter(([nm])=>asistencias.some(tw=>tw.nombre===nm&&tw.marcado&&!tw.ausente));
+            if(!fijosPresentes.length) return null;
+            const totalFijos=fijosPresentes.reduce((s,[,v])=>s+v/7,0);
+            return (<div style={{marginBottom:5,border:"1.5px solid #cc8a00",borderRadius:3,overflow:"hidden"}}>
+              <div style={{background:"#cc8a00",color:"#fff",padding:"3px 6px",display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontWeight:700,fontSize:10}}>SUELDO FIJO . {fijosPresentes.length} pers</span>
+                <span style={{fontWeight:700,fontSize:10}}>{money(totalFijos)}</span>
+              </div>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:8}}>
+                <tbody>
+                  {fijosPresentes.map(([nm,s],i)=>(
+                    <tr key={i} style={{borderBottom:"1px solid #f0f0f0",background:i%2===0?"#fff":"#fafafa"}}>
+                      <td style={{padding:"2px 4px"}}>{nm.split(" ").slice(0,2).join(" ")}</td>
+                      <td style={{padding:"2px 4px",textAlign:"right",fontWeight:700,color:"#2d6a2d"}}>{money(s/7)}</td>
+                    </tr>
+                  ))}
+                  <tr style={{background:"#f0f0f0",fontWeight:700,borderTop:"1px solid #ccc"}}>
+                    <td style={{padding:"2px 4px",fontSize:8}}>TOTAL FIJOS</td>
+                    <td style={{padding:"2px 4px",textAlign:"right",fontSize:8,color:"#2d6a2d"}}>{money(totalFijos)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>);
+          })()}
+
+          {ausentes.length>0&&<div style={{fontSize:8,color:"#666",marginBottom:4}}><b>Ausentes:</b> {ausentes.join(", ")}</div>}
+          <div style={{background:"#111",color:"#fff",padding:"4px 8px",borderRadius:3,display:"flex",justifyContent:"space-between",fontWeight:700,fontSize:10}}>
+            <span>TOTAL PLANTA . {presentes} personas</span>
+            <span style={{color:"#a8e063"}}>{money(totalPlanta)}</span>
+          </div>
+          <div style={{marginTop:10,display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,fontSize:8,color:"#999"}}>
+            <div style={{borderTop:"1px solid #ccc",paddingTop:3}}>Elaboro: _______________</div>
+            <div style={{borderTop:"1px solid #ccc",paddingTop:3}}>Autorizo: _______________</div>
+          </div>
+        </>)}
+
+        {vistaRep==="resumen" && (<>
+          {/* Header compacto */}
+          <div style={{background:"#111",color:"#fff",padding:"6px 10px",borderRadius:4,marginBottom:8}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <div>
+                <div style={{fontWeight:700,fontSize:13,letterSpacing:1}}>RESUMEN DEL DIA</div>
+                <div style={{fontSize:9,color:"#aaa"}}>{fechaDia||fechaHoy}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:18,fontWeight:700,color:"#a8e063"}}>{money(totalPlanta)}</div>
+                <div style={{fontSize:9,color:"#aaa"}}>{presentes} personas</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabla compacta por area */}
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:9,marginBottom:6}}>
+            <thead>
+              <tr style={{background:"#333",color:"#fff"}}>
+                <th style={{padding:"3px 5px",textAlign:"left",fontSize:8}}>Area</th>
+                <th style={{padding:"3px 5px",textAlign:"right",fontSize:8}}>Pers</th>
+                <th style={{padding:"3px 5px",textAlign:"right",fontSize:8}}>Horas ef.</th>
+                <th style={{padding:"3px 5px",textAlign:"right",fontSize:8}}>Gasto</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resumen.filter(a=>a.costoTotal>0).map(a=>{
+                const pData=asistencias.filter(tw=>!tw.ausente).map(tw=>{
+                  const {distLineas,horas:ht}=calcDist(tw,areas);
+                  const d=distLineas[a.id]; if(!d||d.mins<=0) return null;
+                  return {horas:d.frac*(ht||0),costo:d.costo};
+                }).filter(Boolean);
+                const totalH=pData.reduce((s,p)=>s+p.horas,0);
+                return (<tr key={a.id} style={{borderBottom:"1px solid #eee"}}>
+                  <td style={{padding:"3px 5px",fontWeight:700,color:a.color||"#111"}}>{a.nombre}</td>
+                  <td style={{padding:"3px 5px",textAlign:"right"}}>{a.personasEnArea}</td>
+                  <td style={{padding:"3px 5px",textAlign:"right"}}>{fmt1(totalH)}h</td>
+                  <td style={{padding:"3px 5px",textAlign:"right",fontWeight:700}}>{money(a.costoTotal)}</td>
+                </tr>);
+              })}
+              <tr style={{background:"#f0f0f0",fontWeight:700,fontSize:10}}>
+                <td style={{padding:"4px 5px"}}>TOTAL</td>
+                <td style={{padding:"4px 5px",textAlign:"right"}}>{presentes}</td>
+                <td style={{padding:"4px 5px",textAlign:"right"}}>-</td>
+                <td style={{padding:"4px 5px",textAlign:"right",color:"#2d6a2d"}}>{money(totalPlanta)}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Detalle por persona ultra compacto */}
+          {resumen.filter(a=>a.costoTotal>0).map(a=>{
+            const pData=asistencias.filter(tw=>!tw.ausente).map(tw=>{
+              const {distLineas,horas:ht,extras,esFijo}=calcDist(tw,areas);
+              const d=distLineas[a.id]; if(!d||d.mins<=0) return null;
+              return {nombre:tw.nombre,esBase:tw.lineaBase===a.id,horas:d.frac*(ht||0),costo:d.costo,extras,esFijo};
+            }).filter(Boolean);
+            if(!pData.length) return null;
+            return (<div key={a.id} style={{marginBottom:6}}>
+              <div style={{background:a.color||"#333",color:"#fff",padding:"2px 6px",fontSize:9,fontWeight:700,display:"flex",justifyContent:"space-between"}}>
+                <span>{a.nombre}</span><span>{money(a.costoTotal)}</span>
+              </div>
+              {pData.map((p,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:8,padding:"2px 6px",borderBottom:"1px solid #f0f0f0",background:i%2===0?"#fafafa":"#fff"}}>
+                  <span style={{flex:1,color:p.esBase?"#111":"#4a7acc"}}>{p.nombre.split(" ").slice(0,2).join(" ")}{!p.esBase?" (ext)":""}{p.esFijo?" ":""}</span>
+                  <span style={{color:"#666",margin:"0 6px"}}>{fmt1(p.horas)}h{p.extras>0&&!p.esFijo?" +"+fmt1(p.extras)+"ext":""}</span>
+                  <span style={{fontWeight:700,color:"#2d6a2d"}}>{money(p.costo)}</span>
+                </div>
+              ))}
+            </div>);
+          })}
+
+          {/* Sueldo fijo */}
+          {(()=>{
+            const fijosPresentes=Object.entries(SUELDOS_FIJOS).filter(([nm])=>asistencias.some(tw=>tw.nombre===nm&&tw.marcado&&!tw.ausente));
+            if(!fijosPresentes.length) return null;
+            const totalFijos=fijosPresentes.reduce((s,[,v])=>s+v/7,0);
+            return (<div style={{marginBottom:6}}>
+              <div style={{background:"#cc8a00",color:"#fff",padding:"2px 6px",fontSize:9,fontWeight:700,display:"flex",justifyContent:"space-between"}}>
+                <span>Sueldo Fijo</span><span>{money(totalFijos)}</span>
+              </div>
+              {fijosPresentes.map(([nm,s],i)=>(
+                <div key={i} style={{display:"flex",justifyContent:"space-between",fontSize:8,padding:"2px 6px",borderBottom:"1px solid #f0f0f0",background:i%2===0?"#fafafa":"#fff"}}>
+                  <span style={{flex:1}}>{nm.split(" ").slice(0,2).join(" ")}</span>
+                  <span style={{fontWeight:700,color:"#2d6a2d"}}>{money(s/7)}</span>
+                </div>
+              ))}
+            </div>);
+          })()}
+
+          <div style={{background:"#111",color:"#fff",padding:"6px 10px",borderRadius:4,display:"flex",justifyContent:"space-between",fontWeight:700,fontSize:12,marginTop:4}}>
+            <span>TOTAL PLANTA - {presentes} personas</span>
+            <span style={{color:"#a8e063"}}>{money(totalPlanta)}</span>
+          </div>
+        </>)}
+
+        {vistaRep==="historial" && (<>
+          {!historial.length&&<p style={{color:"#999",textAlign:"center",padding:20}}>Sin historial registrado</p>}
+          {historial.map((h,i)=>(
+            <div key={i} style={{marginBottom:14,border:"1px solid #ddd",borderRadius:4,overflow:"hidden"}}>
+              <div style={{background:"#111",color:"#fff",padding:"5px 10px",display:"flex",justifyContent:"space-between"}}>
+                <span style={{fontWeight:700,fontSize:13}}>{h.fechaDia||h.fecha}</span>
+                <span style={{color:"#a8e063",fontWeight:700}}>{money(h.totalPlanta||0)}</span>
+              </div>
+              <div style={{padding:"6px 10px",fontSize:10}}>
+                <div style={{fontSize:9,color:"#888",marginBottom:4}}>Presentes: {h.presentes}</div>
+                {(h.resAreas||[]).filter(a=>a.costoTotal>0).map(a=>(
+                  <div key={a.id} style={{marginBottom:8}}>
+                    <div style={{background:a.color||"#333",color:"#fff",padding:"2px 6px",fontWeight:700,fontSize:10,display:"flex",justifyContent:"space-between"}}>
+                      <span>{a.nombre}</span><span>{money(a.costoTotal)}</span>
+                    </div>
+                    {(a.personas||[]).map((p,j)=>(
+                      <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:9,padding:"2px 6px",borderBottom:"1px solid #f0f0f0",background:j%2===0?"#fff":"#fafafa"}}>
+                        <span style={{color:p.esBase?"#111":"#4a7acc",flex:1}}>{p.nombre}{!p.esBase?" (ext)":""}</span>
+                        <span style={{color:"#666",margin:"0 6px"}}>{fmt1(p.horas)}h en area</span>
+                        <span style={{fontWeight:700,color:"#2d6a2d"}}>{money(p.costoEnArea)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+                {h.fijosPresentes?.length>0&&(
+                  <div style={{marginBottom:8}}>
+                    <div style={{background:"#cc8a00",color:"#fff",padding:"2px 6px",fontWeight:700,fontSize:10,display:"flex",justifyContent:"space-between"}}>
+                      <span>Sueldo Fijo</span><span>{money(h.totalFijos||0)}</span>
+                    </div>
+                    {h.fijosPresentes.map((f,j)=>(
+                      <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:9,padding:"2px 6px",borderBottom:"1px solid #f0f0f0",background:j%2===0?"#fff":"#fafafa"}}>
+                        <span style={{flex:1}}>{f.nombre}</span>
+                        <span style={{fontWeight:700,color:"#2d6a2d"}}>{money(f.costoDia)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {h.ausentes?.length>0&&<div style={{color:"#999",fontSize:9,marginTop:4}}>Ausentes: {h.ausentes.join(", ")}</div>}
+              </div>
+            </div>
+          ))}
+        </>)}
+
+        {(vistaRep==="grupo")&&<p style={{color:"#999",textAlign:"center",padding:20}}>El reporte de grupos no aplica. Usa Asistencia o Resumen.</p>}
+      </div>
+    );
+  }
+
+  // -- UI Principal ----------------------------------------------------------
+  return (<>
+    <div className="wrap">
+      <div className="hdr">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+          <div>
+            <h1>CONTROL DE ASISTENCIAS</h1>
+            <div className="hdr-sub">Areas . Operaciones . Costos reales por hora</div>
+          </div>
+          <input value={fechaDia} onChange={e=>saveFecha(e.target.value)}
+            style={{background:"rgba(255,255,255,0.08)",border:"1px solid #333",borderRadius:3,
+              padding:"4px 8px",fontFamily:"'IBM Plex Mono',monospace",fontSize:10,fontWeight:700,
+              color:"#a8e063",outline:"none",width:100,textAlign:"center",marginTop:4}}
+            placeholder="dd/mm/aa"/>
+        </div>
+        <div className="tarifas">
+          <div className="tarifa">Jornal <b>$360/8h</b></div>
+          <div className="tarifa">Hr extra <b>$50</b></div>
+        </div>
+      </div>
+
+      <div className="tabs">
+        {[["areas"," Areas"],["plantilla"," Plantilla"],["asistencia"," Asistencia"],["grupo"," Grupo"],["resumen"," Resumen"],["captura"," Captura"],["vista"," Vista"],["historial"," Historial"]].map(([id,lbl])=>(
+          <button key={id} className={"tab"+(tab===id?" on":"")} onClick={()=>setTab(id)}>{lbl}</button>
+        ))}
+      </div>
+
+      <button className="btn-rep" onClick={()=>setVistaRep(tab)}> Ver reporte de esta vista</button>
+
+      {/* AREAS */}
+      {tab==="areas"&&(<>
+        <div className="sec">Areas de produccion</div>
+        <div className="nueva">
+          <span className="fl">Nueva area</span>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto",gap:6,marginTop:5}}>
+            <input className="fi" placeholder="Nombre del area..." value={nuevoArea} onChange={e=>setNuevoArea(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addArea()}/>
+            <button className="btn-g" onClick={addArea}>+ Agregar</button>
+          </div>
+        </div>
+        {areas.map(a=>(
+          <div className="ac" key={a.id} style={{borderColor:openArea===a.id?a.color+"66":"#1a1a1a"}}>
+            <div className="ahd" onClick={()=>setOpenArea(o=>o===a.id?null:a.id)}>
+              <div className="dot" style={{background:a.color}}/>
+              <div className="anm" style={{color:a.color}}>{a.nombre}</div>
+              <span style={{color:"#333",fontSize:9,marginLeft:8}}>{openArea===a.id?"^":"v"}</span>
+            </div>
+            {openArea===a.id&&(<div className="abd">
+              <div className="trow"><span className="tlbl">Descuento comida (1h)</span><label className="tgl"><input type="checkbox" checked={a.hayComida} onChange={e=>updArea(a.id,"hayComida",e.target.checked)}/><span className="tsl"/></label></div>
+              <div className="trow"><span className="tlbl">Descuento cena (1h)</span><label className="tgl"><input type="checkbox" checked={a.hayCena} onChange={e=>updArea(a.id,"hayCena",e.target.checked)}/><span className="tsl"/></label></div>
+              <div className="ops-lbl">Operaciones base</div>
+              <div className="ops-list">{getOpsBase(a.opsBase||"general").map(op=><div className="op-base" key={op}>{op}</div>)}</div>
+              {a.opsExtra?.length>0&&(<><div className="ops-lbl">Exclusivas</div><div className="ops-list">{a.opsExtra.map(op=><div className="op-extra" key={op}>{op}<button className="bx" onClick={()=>delOpExtra(a.id,op)}>x</button></div>)}</div></>)}
+              <div className="add-row" style={{marginTop:6}}>
+                <input placeholder="Nueva operacion exclusiva..." value={opExtraInp[a.id]||""} onChange={e=>setOpExtraInp(x=>({...x,[a.id]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&addOpExtra(a.id,opExtraInp[a.id]||"")}/>
+                <button className="btn-g" onClick={()=>addOpExtra(a.id,opExtraInp[a.id]||"")}>+ Op</button>
+              </div>
+              {confirmDelArea===a.id?(
+                <div className="confirm" style={{background:"#1a0d0d",border:"1.5px solid #cc4a4a",marginTop:8}}>
+                  <p style={{color:"#cc4a4a"}}>Eliminar "{a.nombre}"?</p>
+                  <div className="cfbtns"><button className="csi" onClick={confirmarDelArea}>Si, eliminar</button><button className="cno" onClick={()=>setConfirmDelArea(null)}>Cancelar</button></div>
+                </div>
+              ):(
+                <button className="btn-sm" onClick={()=>setConfirmDelArea(a.id)}>x Eliminar area</button>
+              )}
+            </div>)}
+          </div>
+        ))}
+      </>)}
+
+      {/* PLANTILLA */}
+      {tab==="plantilla"&&(<>
+        <div className="sec">Plantilla por area</div>
+        {areas.map(a=>{
+          const ops=getOps(a); const lista=plantilla[a.id]||[];
+          return (<div className="lb" key={a.id} style={{borderColor:openPlt===a.id?a.color+"66":"#1a1a1a"}}>
+            <div className="lbhd" onClick={()=>setOpenPlt(o=>o===a.id?null:a.id)}>
+              <div className="dot" style={{background:a.color}}/><div className="lbnm" style={{color:a.color}}>{a.nombre}</div>
+              <div className="lbct">{lista.length} personas</div>
+              <span style={{color:"#333",fontSize:9,marginLeft:6}}>{openPlt===a.id?"^":"v"}</span>
+            </div>
+            {openPlt===a.id&&(<div className="lbbd">
+              <div className="nlist">
+                {lista.map(p=>{const nm=p.nombre||p,op=p.operacion||""; return (
+                  <div className="nitem" key={nm}>
+                    <span className="nitem-nm">{nm}</span>
+                    <select value={op} onChange={e=>updOpPlt(a.id,nm,e.target.value)} style={{fontSize:8,padding:"2px 5px",border:"1px solid #222",borderRadius:10,background:"#0e0e0e",color:"#666",fontFamily:"'IBM Plex Mono',monospace",outline:"none",maxWidth:90}}>
+                      <option value="">- op -</option>{ops.map(o=><option key={o} value={o}>{o}</option>)}
+                    </select>
+                    <button className="bx" style={{fontSize:13}} onClick={()=>delNombre(a.id,nm)}>x</button>
+                  </div>
+                );})}
+                {!lista.length&&<div style={{color:"#222",fontSize:9,textAlign:"center"}}>Sin personal</div>}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:6}}>
+                <input placeholder="Nombre..." value={inputs[a.id]||""} onChange={e=>setInputs(i=>({...i,[a.id]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&addNombre(a.id)}
+                  style={{border:"1.5px solid #1e1e1e",borderRadius:3,padding:"5px 7px",fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:600,background:"#080808",color:"#e0dcd4",outline:"none"}}/>
+                <select value={opInputs[a.id]||""} onChange={e=>setOpInputs(i=>({...i,[a.id]:e.target.value}))} style={{border:"1.5px solid #1e1e1e",borderRadius:3,padding:"5px 7px",fontFamily:"'IBM Plex Mono',monospace",fontSize:11,background:"#080808",color:"#e0dcd4",outline:"none"}}>
+                  <option value="">- operacion -</option>{ops.map(o=><option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+              <button className="btn-g" style={{width:"100%"}} onClick={()=>addNombre(a.id)}>+ Agregar persona</button>
+            </div>)}
+          </div>);
+        })}
+        <button className="btn-ini" onClick={()=>{ iniciarDia(); setArranqueHoras({}); }}>> INICIAR TODAS LAS LINEAS</button>
+
+          <div className="sec">Arranque por linea</div>
+          <div style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:4,padding:"10px"}}>
+            <div style={{fontSize:8,color:"#555",marginBottom:8,letterSpacing:1}}>Arranca cada linea con su hora de inicio</div>
+            {areas.map(a=>{
+              const enPlt=(plantilla[a.id]||[]).filter(p=>!Object.keys(SUELDOS_FIJOS).includes(p.nombre||p));
+              const arrancada = enPlt.length>0 && enPlt.some(p=>{
+                const tw=asistencias.find(t=>t.nombre===(p.nombre||p));
+                return tw?.arrancado===true;
+              });
+              const horaArr = arranqueHoras[a.id]||"";
+              const col=a.color;
+              return (
+                <div key={a.id} style={{display:"flex",alignItems:"center",gap:8,marginBottom:6,padding:"6px 8px",
+                  background:arrancada?"#0d1a0d":"#141414",borderRadius:3,
+                  border:"1px solid "+(arrancada?col+"66":col+"22")}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:2,color:col}}>{a.nombre}</div>
+                    {arrancada&&<div style={{fontSize:7,color:"#a8e063",letterSpacing:1}}>v ARRANCADA{horaArr?" - "+horaArr:""}</div>}
+                  </div>
+                  <input type="time" value={horaArr}
+                    onChange={e=>setArranqueHoras(h=>({...h,[a.id]:e.target.value}))}
+                    style={{border:"1.5px solid "+col+"55",borderRadius:3,padding:"3px 6px",
+                      fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:700,
+                      background:"#080808",color:"#e0dcd4",outline:"none",width:90}}/>
+                  {horaArr&&(
+                    <button onClick={()=>setArranqueHoras(h=>({...h,[a.id]:""}))}
+                      style={{background:"transparent",border:"none",color:"#555",cursor:"pointer",fontSize:14,padding:"0 2px"}}>x</button>
+                  )}
+                  <button onClick={()=>iniciarLinea(a.id, horaArr)}
+                    style={{padding:"5px 10px",background:arrancada?"#1a3a1a":col,
+                      border:"1.5px solid "+col,borderRadius:3,
+                      fontFamily:"'IBM Plex Mono',monospace",fontSize:8,fontWeight:700,
+                      color:arrancada?col:"#080808",cursor:"pointer",whiteSpace:"nowrap"}}>
+                    {arrancada?" Re-arrancar":"Arrancar"}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+      </>)}
+
+      {/* ASISTENCIA */}
+      {tab==="asistencia"&&(<>
+        {/* Sueldo fijo - 4 estados */}
+        <div className="sec">Sueldo fijo</div>
+        <div style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:4,marginBottom:10,overflow:"hidden"}}>
+          {Object.entries(SUELDOS_FIJOS).map(([nombre,sueldo])=>{
+            const aBase=areas.find(a=>(plantilla[a.id]||[]).some(p=>(p.nombre||p)===nombre));
+            const costoDia=sueldo/7;
+            const tw=asistencias.find(t=>t.nombre===nombre);
+            const estado=tw?.estado||null;
+            const estados=[
+              ["presente",  "v Presente",   "#2d8a2d","#0d1a0d"],
+              ["descanso_c"," D.c/goce",  "#4a7acc","#0d111a"],
+              ["falta",     "x Falta",      "#cc4a4a","#1a0d0d"],
+              ["descanso_s","[!] D.s/goce",  "#cc6600","#1a110d"],
+            ];
+            return (<div key={nombre} style={{padding:"7px 10px",borderBottom:"1px solid #141414"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:5}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:10,fontWeight:700,color:estado==="falta"||estado==="descanso_s"?"#444":"#e0dcd4"}}>{nombre.split(" ").slice(0,2).join(" ")}</div>
+                  <div style={{fontSize:7,color:"#555",marginTop:1}}>{aBase?.nombre||"-"} . {money(costoDia)}/dia</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+                {estados.map(([est,lbl,color,bg])=>(
+                  <button key={est} onClick={()=>{
+                    if(!tw){
+                      const areaId=aBase?.id||"indirectos";
+                      const p=(Object.values(plantilla).flat()).find(x=>(x.nombre||x)===nombre);
+                      saveAsist([...asistencias,{id:Date.now()+Math.random(),nombre,lineaBase:areaId,
+                        ausente:est==="falta"||est==="descanso_s",marcado:true,estado:est,
+                        operacion:p?.operacion||"",segmentos:[]}]);
+                    } else {
+                      const nuevoEstado=estado===est?null:est;
+                      saveAsist(asistencias.map(t=>t.nombre===nombre?{...t,
+                        estado:nuevoEstado,marcado:nuevoEstado!==null,
+                        ausente:nuevoEstado==="falta"||nuevoEstado==="descanso_s"}:t));
+                    }
+                  }} style={{flex:1,padding:"5px 4px",border:"1.5px solid "+(estado===est?color:"#2a2a2a"),borderRadius:3,
+                    background:estado===est?bg:"transparent",fontFamily:"'IBM Plex Mono',monospace",
+                    fontSize:7,fontWeight:700,cursor:"pointer",color:estado===est?color:"#444",whiteSpace:"nowrap"}}>
+                    {lbl}
+                  </button>
+                ))}
+              </div>
+            </div>);
+          })}
+        </div>
+
+        {/* Buscador */}
+        <div style={{marginBottom:10}}>
+          <input
+            placeholder=" Buscar persona por nombre..."
+            value={busqueda}
+            onChange={e=>setBusqueda(e.target.value)}
+            style={{width:"100%",border:"1.5px solid #2d8a2d",borderRadius:3,padding:"7px 10px",
+              fontFamily:"'IBM Plex Mono',monospace",fontSize:12,fontWeight:600,
+              background:"#0e0e0e",color:"#e0dcd4",outline:"none"}}/>
+          {busqueda.length>=2&&(()=>{
+            const term=busqueda.toLowerCase();
+            const resultados=asistencias.filter(tw=>tw.nombre.toLowerCase().includes(term));
+            if(!resultados.length) return <div style={{fontSize:9,color:"#555",padding:"6px 8px",background:"#111",borderRadius:3,marginTop:4}}>No se encontro ninguna persona</div>;
+            return (<div style={{background:"#111",borderRadius:3,marginTop:4,overflow:"hidden"}}>
+              {resultados.map(tw=>{
+                const {costoTotal,horas,extras,esFijo}=calcDist(tw,areas);
+                const aBase=areas.find(a=>a.id===tw.lineaBase);
+                const segs=(tw.segmentos||[]).filter(s=>s.inicio);
+                return (<div key={tw.id} style={{padding:"8px 10px",borderBottom:"1px solid #1a1a1a"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                    <span style={{fontSize:11,fontWeight:700,color:"#e0dcd4"}}>{tw.nombre}</span>
+                    {costoTotal>0&&<span style={{fontSize:10,fontWeight:700,color:"#a8e063"}}>{money(costoTotal)}</span>}
+                  </div>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap",fontSize:8}}>
+                    <span style={{background:aBase?.bg,color:aBase?.color,padding:"2px 7px",borderRadius:10,fontWeight:700}}>{aBase?.nombre||"-"}</span>
+                    {tw.operacion&&<span style={{color:"#888"}}>{tw.operacion}</span>}
+                    {tw.ausente&&<span style={{color:"#f08060",fontWeight:700}}>AUSENTE</span>}
+                    {esFijo&&<span style={{color:"#f0c050",fontWeight:700}}>FIJO {money(getCostoDiarioFijo(tw.nombre))}/dia</span>}
+                  </div>
+                  {segs.length>0&&(<div style={{marginTop:5,fontSize:8,color:"#555"}}>
+                    {segs.map((s,i)=>{
+                      const lS=areas.find(a=>a.id===s.areaId);
+                      const dur=s.inicio&&s.fin?diffMins(s.inicio,s.fin):0;
+                      return (<div key={i} style={{display:"flex",gap:6,alignItems:"center",marginBottom:2}}>
+                        <div style={{width:6,height:6,borderRadius:"50%",background:lS?.color||"#555",flexShrink:0}}/>
+                        <span style={{color:lS?.color,fontWeight:700,minWidth:60}}>{lS?.nombre}</span>
+                        <span>{s.inicio}{s.fin?"&gt;"+s.fin:" (en curso)"}</span>
+                        {dur>0&&<span style={{color:"#a8e063",marginLeft:"auto"}}>{fmt1(dur/60)}h</span>}
+                      </div>);
+                    })}
+                    {horas>0&&<div style={{marginTop:3,color:"#a8e063",fontWeight:700}}>{fmt1(horas)}h efectivas{extras>0&&!esFijo?" . "+fmt1(extras)+"h extra":""}</div>}
+                  </div>)}
+                </div>);
+              })}
+            </div>);
+          })()}
+        </div>
+        {!asistencias.length?<div className="empty">Ve a Plantilla y presiona Iniciar dia para comenzar</div>
+        :areas.map(a=>{
+          const twsLinea=asistencias.filter(tw=>tw.lineaBase===a.id);
+          if(!twsLinea.length) return null;
+          const costoA=asistencias.filter(tw=>!tw.ausente).reduce((s,tw)=>{const {distLineas}=calcDist(tw,areas);return s+(distLineas[a.id]?.costo||0);},0);
+          const ops=getOps(a);
+          const grupos={};
+          twsLinea.filter(tw=>!tw.ausente).forEach(tw=>{const op=tw.operacion||"- Sin asignar -";if(!grupos[op])grupos[op]=[];grupos[op].push(tw);});
+          const ordenados=[...ops,"- Sin asignar -"].filter(op=>grupos[op]?.length>0).map(op=>({op,tws:grupos[op]}));
+          return (<div className="ls" key={a.id}>
+            <div className="lshd" style={{background:a.bg}}>
+              <div className="dot" style={{background:a.color}}/>
+              <div className="lsnm" style={{color:a.color}}>{a.nombre}</div>
+              <div className="lsinf">{twsLinea.filter(tw=>!tw.ausente).length}/{twsLinea.length} . {money(costoA)}</div>
+            </div>
+            {movLineaId===a.id?(
+              <div className="mov-panel">
+                <div className="mov-title">Recorrido del dia - {a.nombre}</div>
+                {movSegs.map((s,i)=>{
+                  const lS=areas.find(x=>x.id===s.areaId);
+                  const dur=s.inicio&&s.fin?diffMins(s.inicio,s.fin):0;
+                  return (<div className="seg-card" key={i}>
+                    <div className="seg-hd">
+                      {lS&&<div className="dot" style={{background:lS.color}}/>}
+                      <div className="seg-nm" style={{color:lS?.color||"#888"}}>{i===0?"Inicia en:":"Despues en:"}</div>
+                      <select value={s.areaId} onChange={e=>setMovSegs(ss=>ss.map((x,j)=>j===i?{...x,areaId:e.target.value}:x))} style={{border:"1.5px solid #2a2a2a",borderRadius:3,padding:"4px 6px",fontFamily:"'IBM Plex Mono',monospace",fontSize:11,fontWeight:700,background:"#080808",color:"#e0dcd4",outline:"none"}}>
+                        <option value="">- Area -</option>
+                        {areas.map(x=><option key={x.id} value={x.id}>{x.nombre}</option>)}
+                      </select>
+                      {i>0&&<button className="bx" style={{fontSize:14}} onClick={()=>setMovSegs(ss=>ss.filter((_,j)=>j!==i))}>x</button>}
+                    </div>
+                    <div className="seg-grid">
+                      <div><div className="seg-lbl">Hora inicio</div><input type="time" className="seg-inp" value={s.inicio||""} onChange={e=>setMovSegs(ss=>ss.map((x,j)=>j===i?{...x,inicio:e.target.value}:x))}/></div>
+                      <div><div className="seg-lbl">Hora fin</div><input type="time" className="seg-inp" value={s.fin||""} onChange={e=>setMovSegs(ss=>ss.map((x,j)=>j===i?{...x,fin:e.target.value}:x))}/></div>
+                      <div style={{paddingBottom:2,display:"flex",alignItems:"flex-end"}}>{dur>0&&<span className="green" style={{fontSize:9,fontWeight:700}}>{fmt1(dur/60)}h</span>}</div>
+                    </div>
+                  </div>);
+                })}
+                <button className="btn-add-seg" onClick={()=>setMovSegs(ss=>[...ss,{areaId:"",inicio:"",fin:""}])}>+ Agregar siguiente area</button>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginTop:8}}>
+                  <button onClick={()=>{
+                    const ids=asistencias.filter(tw=>tw.lineaBase===movLineaId&&!tw.ausente).map(tw=>tw.id);
+                    saveAsist(asistencias.map(tw=>ids.includes(tw.id)?{...tw,segmentos:[...movSegs]}:tw));
+                    setMovLineaId(null); setMovSegs([]);
+                  }} style={{padding:"8px",background:"#a8e063",border:"none",borderRadius:3,fontFamily:"'IBM Plex Mono',monospace",fontSize:9,fontWeight:700,color:"#080808",cursor:"pointer"}}>
+                    v Guardar recorrido de esta linea
+                  </button>
+                  <button onClick={()=>setMovLineaId(null)} style={{padding:"8px",background:"transparent",border:"1.5px solid #333",borderRadius:3,fontFamily:"'IBM Plex Mono',monospace",fontSize:9,fontWeight:700,color:"#666",cursor:"pointer"}}>Cancelar</button>
+                </div>
+              </div>
+            ):(
+              <button onClick={()=>abrirMovLinea(a.id)} className="btn-lc" style={{borderColor:a.color,color:a.color}}> Registrar recorrido - {a.nombre}</button>
+            )}
+            {ordenados.map(({op,tws})=>(
+              <div key={op} style={{marginBottom:6}}>
+                <div style={{display:"flex",alignItems:"center",gap:8,padding:"4px 8px",marginBottom:2,background:op==="- Sin asignar -"?"#111":a.bg,borderLeft:"3px solid "+a.color,borderRadius:"0 3px 3px 0"}}>
+                  <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:13,letterSpacing:2,color:op==="- Sin asignar -"?"#444":a.color,flex:1}}>{op}</span>
+                  <span style={{fontSize:8,color:"#555"}}>{tws.length} pers.</span>
+                </div>
+                {tws.map(tw=>(
+                  <TwRow key={tw.id} tw={tw} areas={areas}
+                    onUpdSeg={(idx,campo,val)=>updSeg(tw.id,idx,campo,val)}
+                    onAusente={()=>ausente(tw.id)}
+                    onOp={op=>setOp(tw.id,op)}
+                    onEstado={est=>saveAsist(asistencias.map(t=>t.id!==tw.id?t:{...t,estado:est,ausente:est==="falta"||est==="descanso_s"}))}/>
+                ))}
+              </div>
+            ))}
+            {twsLinea.filter(tw=>tw.ausente).length>0&&(
+              <div style={{fontSize:8,color:"#444",padding:"4px 8px"}}>Ausentes: {twsLinea.filter(tw=>tw.ausente).map(tw=>tw.nombre).join(", ")}</div>
+            )}
+          </div>);
+        })}
+        {!!asistencias.length&&(confirmNuevoDia?(
+          <div className="confirm" style={{background:"#1a1500",border:"1.5px solid #f0c050",margin:"8px 0"}}>
+            <p style={{color:"#f0c050"}}>Iniciar nuevo dia? El resumen se guardara en el historial.</p>
+            <div className="cfbtns"><button className="csi" style={{background:"#a8e063",color:"#080808"}} onClick={confirmarNuevoDia}>Si, nuevo dia</button><button className="cno" onClick={()=>setConfirmNuevoDia(false)}>Cancelar</button></div>
+          </div>
+        ):(
+          <button className="bdanger" onClick={()=>setConfirmNuevoDia(true)}> Nuevo dia - guardar en historial</button>
+        ))}
+      </>)}
+
+      {/* GRUPO */}
+      {tab==="grupo"&&(<>
+        <div className="sec">Mover grupo</div>
+        <div style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:4,padding:10}}>
+          <div style={{fontSize:8,letterSpacing:2,textTransform:"uppercase",color:"#a8e063",fontWeight:700,marginBottom:6}}>Paso 1 - Por area o persona</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:8}}>
+            {areas.map(a=>{const twsA=activos.filter(tw=>tw.lineaBase===a.id);if(!twsA.length)return null;const todos=twsA.every(tw=>selGrupo.includes(tw.id));
+              return <button key={a.id} style={{padding:"5px 10px",border:"1.5px solid "+a.color,borderRadius:3,background:todos?a.color+"33":"transparent",fontFamily:"'IBM Plex Mono',monospace",fontSize:8,fontWeight:700,color:a.color,cursor:"pointer"}}
+                onClick={()=>{const ids=twsA.map(tw=>tw.id);setSelGrupo(s=>todos?s.filter(x=>!ids.includes(x)):[...new Set([...s,...ids])]);}}>
+                {todos?"v ":""}{a.nombre} ({twsA.length})</button>;
+            })}
+          </div>
+          <div className="chips">
+            {activos.map(tw=>{const sel=selGrupo.includes(tw.id);const lI=areas.find(a=>a.id===tw.lineaBase);
+              return <div key={tw.id} className={"chip"+(sel?" sel":"")} style={sel?{borderColor:lI?.color,color:lI?.color}:{}} onClick={()=>setSelGrupo(s=>s.includes(tw.id)?s.filter(x=>x!==tw.id):[...s,tw.id])}>{sel?"v ":""}{tw.nombre}</div>;
+            })}
+            {!activos.length&&<div style={{color:"#2a2a2a",fontSize:9}}>Sin trabajadores activos</div>}
+          </div>
+          {selGrupo.length>0&&(<>
+            <div style={{fontSize:8,letterSpacing:2,textTransform:"uppercase",color:"#a8e063",fontWeight:700,margin:"10px 0 6px"}}>Paso 2 - Elige destino</div>
+            <div style={{display:"flex",flexDirection:"column",gap:5}}>
+              {areas.map(a=>(
+                <button key={a.id} style={{padding:"9px 12px",border:"2px solid "+a.color,borderRadius:4,background:"transparent",fontFamily:"'IBM Plex Mono',monospace",fontSize:10,fontWeight:700,cursor:"pointer",textAlign:"left",color:a.color}}
+                  onClick={()=>moverGrupo(a.id)}>
+                  Mover {selGrupo.length} persona{selGrupo.length>1?"s":""} a {a.nombre}
+                </button>
+              ))}
+            </div>
+          </>)}
+        </div>
+      </>)}
+
+      {/* RESUMEN */}
+      {tab==="resumen"&&(<>
+        <div className="sec">Plantilla vs Asistencia</div>
+
+        {/* Totales generales */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:5,marginBottom:10}}>
+          <div style={{background:"#141820",border:"1.5px solid #22263a",borderRadius:4,padding:"8px 10px",textAlign:"center"}}>
+            <div style={{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#8899bb",marginBottom:4,fontWeight:700}}>Plantilla</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:26,color:"#f0ede8",lineHeight:1}}>{Object.values(PLANTILLA_FIJA).flat().length + Object.keys(SUELDOS_FIJOS).length}</div>
+          </div>
+          <div style={{background:"#0d1a0d",border:"1px solid #2d8a2d33",borderRadius:4,padding:"8px 10px",textAlign:"center"}}>
+            <div style={{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#a8e063",marginBottom:4,fontWeight:700}}>Presentes</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:26,color:"#a8e063",lineHeight:1}}>{presentes}</div>
+          </div>
+          <div style={{background:"#1a0d0d",border:"1px solid #cc4a4a33",borderRadius:4,padding:"8px 10px",textAlign:"center"}}>
+            <div style={{fontSize:11,letterSpacing:2,textTransform:"uppercase",color:"#f08060",marginBottom:4,fontWeight:700}}>Faltas</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:26,color:"#f08060",lineHeight:1}}>{ausentes.length}</div>
+          </div>
+        </div>
+
+        {/* Por area */}
+        <div style={{background:"#141820",border:"1.5px solid #22263a",borderRadius:5,marginBottom:12,overflow:"hidden"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",gap:0,padding:"8px 12px",borderBottom:"1.5px solid #22263a",background:"#1a1e2a"}}>
+            <span style={{fontSize:12,letterSpacing:1,textTransform:"uppercase",color:"#8899bb",fontWeight:700}}>Area</span>
+            <span style={{fontSize:12,letterSpacing:1,textTransform:"uppercase",color:"#8899bb",fontWeight:700,minWidth:65,textAlign:"right"}}>Plantilla</span>
+            <span style={{fontSize:12,letterSpacing:1,textTransform:"uppercase",color:"#a8e063",fontWeight:700,minWidth:65,textAlign:"right"}}>Presentes</span>
+            <span style={{fontSize:12,letterSpacing:1,textTransform:"uppercase",color:"#f08060",fontWeight:700,minWidth:55,textAlign:"right"}}>Faltas</span>
+          </div>
+          {areas.map(a=>{
+            const enPlt=(PLANTILLA_FIJA[a.id]||[]).length;
+            if(!enPlt) return null;
+            const enAsist=asistencias.filter(tw=>tw.lineaBase===a.id&&!tw.ausente).length;
+            const faltas=asistencias.filter(tw=>tw.lineaBase===a.id&&tw.ausente).length;
+            return (<div key={a.id} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",gap:0,padding:"8px 12px",borderBottom:"1px solid #1e2230",alignItems:"center"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:a.color}}/>
+                <span style={{fontSize:13,fontWeight:700,color:a.color}}>{a.nombre}</span>
+              </div>
+              <span style={{fontSize:14,fontWeight:700,color:"#f0ede8",minWidth:65,textAlign:"right"}}>{enPlt}</span>
+              <span style={{fontSize:14,fontWeight:700,color:"#a8e063",minWidth:65,textAlign:"right"}}>{enAsist}</span>
+              <span style={{fontSize:14,fontWeight:700,color:faltas>0?"#f08060":"#333",minWidth:55,textAlign:"right"}}>{faltas}</span>
+            </div>);
+          })}
+          {/* Sueldo fijo */}
+          {(()=>{
+            const fijos=Object.keys(SUELDOS_FIJOS);
+            const fijosPresentes=asistencias.filter(tw=>fijos.includes(tw.nombre)&&!tw.ausente).length;
+            const fijosFaltas=asistencias.filter(tw=>fijos.includes(tw.nombre)&&tw.ausente).length;
+            return (<div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto",gap:0,padding:"8px 12px",background:"#1a1e2a",alignItems:"center"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <div style={{width:8,height:8,borderRadius:"50%",background:"#f0c050"}}/>
+                <span style={{fontSize:13,fontWeight:700,color:"#f0c050"}}>Sueldo Fijo</span>
+              </div>
+              <span style={{fontSize:14,fontWeight:700,color:"#f0ede8",minWidth:65,textAlign:"right"}}>{fijos.length}</span>
+              <span style={{fontSize:14,fontWeight:700,color:"#a8e063",minWidth:65,textAlign:"right"}}>{fijosPresentes}</span>
+              <span style={{fontSize:11,fontWeight:700,color:fijosFaltas>0?"#f08060":"#333",minWidth:40,textAlign:"right"}}>{fijosFaltas}</span>
+            </div>);
+          })()}
+        </div>
+
+        {/* Filtros por concepto */}
+        <div className="sec">Filtros por concepto</div>
+        {(()=>{
+          const totalJornales=resumen.reduce((s,a)=>s+a.costoTotal,0);
+          const totalExtrasAmt=asistencias.filter(tw=>!tw.ausente).reduce((s,tw)=>{const {extras:ex,esFijo}=calcDist(tw,areas);return s+(!esFijo?ex*COSTO_HREXT:0);},0);
+          const totalCenas=areas.reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.cenas||0)*PRECIO_CENA;},0);
+          const totalBultos=areas.reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.bultos||0);},0);
+          const costoSinExtras=totalJornales-totalExtrasAmt;
+          return (<>
+            <div style={{background:"#141820",border:"2px solid #22263a",borderRadius:5,marginBottom:12,overflow:"hidden"}}>
+              {[
+                ["Jornales base",money(costoSinExtras),"#f0ede8"],
+                ["Horas extra",money(totalExtrasAmt),"#f0c050"],
+                ["Cenas",money(totalCenas),"#6aa0e0"],
+                ["Total jornales+cenas",money(totalJornales+totalCenas),"#a8e063"],
+                ["Total bultos",totalBultos+" bts","#8899bb"],
+                ["Costo/bulto (sin destajo)",totalBultos>0?money((totalJornales+totalCenas)/totalBultos):"-","#a8e063"],
+              ].map(([lbl,val,col])=>(
+                <div key={lbl} style={{display:"flex",justifyContent:"space-between",padding:"9px 14px",borderBottom:"1px solid #22263a",alignItems:"center"}}>
+                  <span style={{fontSize:13,color:"#8899bb",fontWeight:600}}>{lbl}</span>
+                  <span style={{fontSize:15,fontWeight:700,color:col}}>{val}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="sec">Desglose por area</div>
+            <div style={{background:"#141820",border:"2px solid #22263a",borderRadius:5,marginBottom:12,overflow:"hidden"}}>
+              <div style={{display:"grid",gridTemplateColumns:"140px 1fr 1fr 1fr 1fr",gap:0,padding:"8px 12px",borderBottom:"2px solid #22263a",background:"#1a1e2a"}}>
+                <span style={{fontSize:12,color:"#8899bb",letterSpacing:1,textTransform:"uppercase",fontWeight:700}}>Area</span>
+                <span style={{fontSize:12,color:"#f0ede8",textAlign:"right",fontWeight:700}}>Jornal</span>
+                <span style={{fontSize:12,color:"#f0c050",textAlign:"right",fontWeight:700}}>Extra</span>
+                <span style={{fontSize:12,color:"#6aa0e0",textAlign:"right",fontWeight:700}}>Cenas</span>
+                <span style={{fontSize:12,color:"#a8e063",textAlign:"right",fontWeight:700}}>Total</span>
+              </div>
+              <div>
+                {areas.map(a=>{
+                  const jornal=resumen.find(r=>r.id===a.id)?.costoTotal||0;
+                  const cenasArea=(extras[a.id]?.cenas||0)*PRECIO_CENA;
+                  if(!jornal&&!cenasArea) return null;
+                  const extrasArea=asistencias.filter(tw=>!tw.ausente&&tw.lineaBase===a.id).reduce((s,tw)=>{const {extras:ex,esFijo}=calcDist(tw,areas);return s+(!esFijo?ex*COSTO_HREXT:0);},0);
+                  return (<div key={a.id} style={{display:"grid",gridTemplateColumns:"140px 1fr 1fr 1fr 1fr",gap:0,padding:"8px 12px",borderBottom:"1px solid #1e2230",alignItems:"center"}}>
+                    <span style={{fontSize:13,fontWeight:700,color:a.color}}>{a.nombre}</span>
+                    <span style={{fontSize:13,textAlign:"right",color:"#f0ede8",fontWeight:600}}>{money(jornal)}</span>
+                    <span style={{fontSize:13,textAlign:"right",color:"#f0c050",fontWeight:600}}>{extrasArea>0?money(extrasArea):"-"}</span>
+                    <span style={{fontSize:13,textAlign:"right",color:"#6aa0e0",fontWeight:600}}>{cenasArea>0?money(cenasArea):"-"}</span>
+                    <span style={{fontSize:13,textAlign:"right",fontWeight:700,color:"#a8e063"}}>{money(jornal+cenasArea)}</span>
+                  </div>);
+                })}
+              </div>
+              <div style={{display:"grid",gridTemplateColumns:"140px 1fr 1fr 1fr 1fr",gap:0,padding:"10px 12px",background:"#1a1e2a",alignItems:"center",borderTop:"2px solid #22263a"}}>
+                <span style={{fontSize:13,fontWeight:700,color:"#f0ede8"}}>TOTAL</span>
+                <span style={{fontSize:14,textAlign:"right",fontWeight:700,color:"#f0ede8"}}>{money(totalJornales)}</span>
+                <span style={{fontSize:14,textAlign:"right",fontWeight:700,color:"#f0c050"}}>{money(totalExtrasAmt)}</span>
+                <span style={{fontSize:14,textAlign:"right",fontWeight:700,color:"#6aa0e0"}}>{money(totalCenas)}</span>
+                <span style={{fontSize:14,textAlign:"right",fontWeight:700,color:"#a8e063"}}>{money(totalJornales+totalCenas)}</span>
+              </div>
+            </div>
+          </>);
+        })()}
+
+        <div className="sec">Costo real por area</div>
+        <div style={{background:"#161a24",padding:"8px 12px",borderRadius:4,marginBottom:10,fontSize:13,color:"#8899bb",border:"1px solid #22263a"}}>
+          Trabajadores en memoria: <b style={{color:"#a8e063"}}>{asistencias.length}</b> . 
+          Con segmentos cerrados: <b style={{color:"#a8e063"}}>{asistencias.filter(tw=>(tw.segmentos||[]).some(s=>s.inicio&&s.fin)).length}</b> . 
+          Areas con costo: <b style={{color:"#a8e063"}}>{resumen.filter(a=>a.costoTotal>0).length}</b>
+        </div>
+        {resumen.filter(a=>a.costoTotal>0).length===0&&(
+          <div className="empty">Registra segmentos con hora inicio y fin para ver el resumen</div>
+        )}
+        {resumen.map(a=>{
+          if(!a.costoTotal) return null;
+          const pData=asistencias.filter(tw=>!tw.ausente).map(tw=>{
+            const {distLineas,horas:ht,extras,esFijo}=calcDist(tw,areas);
+            const d=distLineas[a.id];if(!d||d.mins<=0)return null;
+            return {nombre:tw.nombre,esBase:tw.lineaBase===a.id,horas:d.frac*(ht||0),costo:d.costo,extras,esFijo,operacion:tw.operacion||""};
+          }).filter(Boolean);
+          const aBase=areas.find(x=>x.id===a.id);
+          return (<div className="rl" key={a.id} style={{borderColor:a.color+"33"}}>
+            <div className="rlhd" style={{background:a.bg}}>
+              <div className="rlnm" style={{color:a.color}}>{a.nombre}</div>
+              <div className="rltot">{money(a.costoTotal)}</div>
+            </div>
+            <div className="rlbd">
+              <div className="rlr"><label>Personas en area</label><span>{a.personasEnArea}</span></div>
+              {aBase?.hayComida&&<div className="rlr"><label>Descuento comida</label><span style={{color:"#f08060"}}>-1h por persona base</span></div>}
+              {aBase?.hayCena&&<div className="rlr"><label>Descuento cena</label><span style={{color:"#f08060"}}>-1h por persona base</span></div>}
+              <div style={{marginTop:6,borderTop:"1px solid #1a1a1a",paddingTop:5}}>
+                {pData.map((p,i)=>(
+                  <div key={i} style={{background:"#0e0e0e",borderRadius:2,marginBottom:3,padding:"4px 6px"}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",fontSize:9}}>
+                      <span style={{fontWeight:700,flex:1,color:p.esBase?"#e0dcd4":"#4a7acc"}}>
+                        {p.nombre}{!p.esBase&&<span style={{fontSize:7}}>(ext)</span>}
+                        {p.esFijo&&<span style={{fontSize:6,color:"#f0c050",marginLeft:4,letterSpacing:1}}>FIJO</span>}
+                      </span>
+                      <span style={{color:"#a8e063",fontWeight:700,marginLeft:8}}>{money(p.costo)}</span>
+                    </div>
+                    <div style={{display:"flex",gap:10,marginTop:2,fontSize:8,color:"#555"}}>
+                      {p.operacion&&<span>{p.operacion}</span>}
+                      <span>{fmt1(p.horas)}h efectivas</span>
+                      {p.extras>0&&!p.esFijo&&<span style={{color:"#f0c050"}}>{fmt1(p.extras)}h extra</span>}
+                      {p.esFijo&&<span style={{color:"#f0c050"}}>Sin extras</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {Object.keys(a.opsCount||{}).length>0&&(
+                <div style={{marginTop:6,paddingTop:5,borderTop:"1px solid #1a1a1a"}}>
+                  <div style={{fontSize:7,letterSpacing:2,textTransform:"uppercase",color:"#444",marginBottom:4}}>Por operacion</div>
+                  {Object.entries(a.opsCount).map(([op,cnt])=>(
+                    <div style={{display:"flex",justifyContent:"space-between",fontSize:8,padding:"2px 4px",background:"#0e0e0e",borderRadius:2,marginBottom:2}} key={op}>
+                      <label style={{color:"#666"}}>{op}</label><span style={{fontWeight:600}}>{cnt} persona{cnt>1?"s":""}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>);
+        })}
+        {totalPlanta>0&&<div className="gran">
+          <span style={{fontSize:8,letterSpacing:2,textTransform:"uppercase",color:"#555"}}>Total planta</span>
+          <span style={{fontSize:16,fontWeight:700,color:"#a8e063"}}>{money(totalPlanta)}</span>
+        </div>}
+      </>)}
+
+      {/* CAPTURA - Cenas y Bultos */}
+      {tab==="captura"&&(<>
+        <div className="sec">Cenas y bultos por area</div>
+        <div style={{fontSize:13,color:"#8899bb",marginBottom:10,padding:"8px 12px",background:"#161a24",borderRadius:4,border:"1px solid #22263a"}}>
+          Cena: <b style={{color:"#a8e063",fontSize:15}}>${PRECIO_CENA}</b> por persona . Captura diaria por area
+        </div>
+        {areas.map(a=>{
+          const ex=extras[a.id]||{cenas:0,bultos:0};
+          
+          // Conversion presentaciones a bulto base
+          let bultosBase = 0;
+          const esEuro = a.id==="euro";
+          const esSlicer = a.id==="slicer";
+          if(esEuro){
+            bultosBase = (parseFloat(ex.p12ct)||0) + (parseFloat(ex.p24ct)||0)*2 + (parseFloat(ex.p19b)||0)*4;
+          } else if(esSlicer){
+            bultosBase = (parseFloat(ex.p18ct)||0)/2 + (parseFloat(ex.p24ct)||0)/1.5 + (parseFloat(ex.p36ct)||0) + (parseFloat(ex.p25lb)||0) + (parseFloat(ex.p50lb)||0)*2;
+          }
+
+          const bultosEfectivos = a.id==="indirectos"
+            ? areas.filter(x=>x.id!=="indirectos").reduce((s,x)=>{const ex2=extras[x.id]||{};
+                const esE=x.id==="euro"; const esS=x.id==="slicer";
+                if(esE) return s+((parseFloat(ex2.p12ct)||0)+(parseFloat(ex2.p24ct)||0)*2+(parseFloat(ex2.p19b)||0)*4);
+                if(esS) return s+((parseFloat(ex2.p18ct)||0)/2+(parseFloat(ex2.p24ct)||0)/1.5+(parseFloat(ex2.p36ct)||0)+(parseFloat(ex2.p25lb)||0)+(parseFloat(ex2.p50lb)||0)*2);
+                return s+(ex2.bultos||0);
+              },0)
+            : (esEuro||esSlicer) ? Math.round(bultosBase*10)/10
+            : (ex.bultos||0);
+          const costoCenas=(ex.cenas||0)*PRECIO_CENA;
+          const costoJornales=resumen.find(r=>r.id===a.id)?.costoTotal||0;
+          const costoBulto=bultosEfectivos>0?(costoJornales+costoCenas)/bultosEfectivos:0;
+          return (<div key={a.id} style={{border:"2px solid "+a.color+"55",borderRadius:6,marginBottom:10,overflow:"hidden"}}>
+            <div style={{background:a.bg,padding:"8px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+              <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:22,letterSpacing:2,color:a.color}}>{a.nombre}</span>
+              {bultosEfectivos>0&&<span style={{fontSize:14,color:a.color,fontWeight:700}}>${costoBulto.toFixed(2)}/bulto</span>}
+            </div>
+            <div style={{padding:"12px 14px",background:"#0f1218"}}>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+                <div>
+                  <div style={{fontSize:12,letterSpacing:2,textTransform:"uppercase",color:"#8899bb",marginBottom:6,fontWeight:700}}>Cenas</div>
+                  <input type="number" min="0" placeholder="0" value={ex.cenas||""}
+                    onChange={e=>saveExtras({...extras,[a.id]:{...ex,cenas:parseFloat(e.target.value)||0}})}
+                    style={{width:"100%",border:"2px solid #22263a",borderRadius:4,padding:"8px 10px",fontFamily:"'IBM Plex Mono',monospace",fontSize:16,fontWeight:700,background:"#0d1016",color:"#f0ede8",outline:"none"}}/>
+                  {(ex.cenas||0)>0&&<div style={{fontSize:13,color:"#f0c050",marginTop:5,fontWeight:700}}>{money(costoCenas)}</div>}
+                </div>
+                <div>
+                  <div style={{fontSize:12,letterSpacing:2,textTransform:"uppercase",color:"#8899bb",marginBottom:6,fontWeight:700}}>
+                    {a.id==="indirectos"?"Bultos (auto)":(esEuro||esSlicer)?"Bultos (auto)":"Bultos totales"}
+                  </div>
+                  {a.id==="indirectos"
+                    ? <div style={{padding:"8px 10px",background:"#161a24",borderRadius:4,fontFamily:"'IBM Plex Mono',monospace",fontSize:16,fontWeight:700,color:"#a8e063",border:"2px solid #22263a"}}>{bultosEfectivos} bts</div>
+                    : (esEuro||esSlicer)
+                    ? <div style={{padding:"8px 10px",background:"#161a24",borderRadius:4,fontFamily:"'IBM Plex Mono',monospace",fontSize:16,fontWeight:700,color:"#a8e063",border:"2px solid #22263a"}}>{bultosEfectivos} bts</div>
+                    : <input type="number" min="0" placeholder="0" value={ex.bultos||""}
+                        onChange={e=>saveExtras({...extras,[a.id]:{...ex,bultos:parseFloat(e.target.value)||0}})}
+                        style={{width:"100%",border:"2px solid #22263a",borderRadius:4,padding:"8px 10px",fontFamily:"'IBM Plex Mono',monospace",fontSize:16,fontWeight:700,background:"#0d1016",color:"#f0ede8",outline:"none"}}/>
+                  }
+                  {bultosEfectivos>0&&<div style={{fontSize:13,color:"#a8e063",marginTop:5,fontWeight:700}}>{money(costoBulto)}/bulto</div>}
+                </div>
+              </div>
+
+              {/* Campos presentaciones Euro */}
+              {esEuro&&(
+                <div style={{marginTop:10,padding:"10px 12px",background:"#161a24",borderRadius:4,border:"1px solid #22263a"}}>
+                  <div style={{fontSize:9,color:"#8899bb",textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontWeight:700}}>Presentaciones Euro (base: 12ct)</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                    {[["p12ct","12ct","x1"],["p24ct","24ct","x2"],["p19b","1/9 bush","x4"]].map(function(item){
+                      const k=item[0], lb=item[1], conv=item[2];
+                      return (<div key={k}>
+                        <div style={{fontSize:9,color:"#8899bb",marginBottom:3}}>{lb} <span style={{color:"#444"}}>({conv})</span></div>
+                        <input type="number" min="0" placeholder="0" value={ex[k]||""}
+                          onChange={e=>saveExtras({...extras,[a.id]:{...ex,[k]:e.target.value}})}
+                          style={{width:"100%",border:"2px solid #22263a",borderRadius:4,padding:"6px 8px",fontFamily:"'IBM Plex Mono',monospace",fontSize:14,fontWeight:700,background:"#0d1016",color:"#f0ede8",outline:"none",textAlign:"center"}}/>
+                      </div>);
+                    })}
+                  </div>
+                  {bultosEfectivos>0&&<div style={{marginTop:6,fontSize:11,color:"#a8e063",fontWeight:700,textAlign:"right"}}>= {bultosEfectivos} cajas de 12ct</div>}
+                </div>
+              )}
+
+              {/* Campos presentaciones Slicer */}
+              {esSlicer&&(
+                <div style={{marginTop:10,padding:"10px 12px",background:"#161a24",borderRadius:4,border:"1px solid #22263a"}}>
+                  <div style={{fontSize:9,color:"#8899bb",textTransform:"uppercase",letterSpacing:1,marginBottom:8,fontWeight:700}}>Presentaciones Slicer (base: 36ct/25lb)</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}}>
+                    {[["p18ct","18ct","/2"],["p24ct","24ct","/1.5"],["p36ct","36ct","x1"],["p25lb","25lb","x1"],["p50lb","50lb","x2"]].map(function(item){
+                      const k=item[0], lb=item[1], conv=item[2];
+                      return (<div key={k}>
+                        <div style={{fontSize:9,color:"#8899bb",marginBottom:3}}>{lb} <span style={{color:"#444"}}>({conv})</span></div>
+                        <input type="number" min="0" placeholder="0" value={ex[k]||""}
+                          onChange={e=>saveExtras({...extras,[a.id]:{...ex,[k]:e.target.value}})}
+                          style={{width:"100%",border:"2px solid #22263a",borderRadius:4,padding:"6px 8px",fontFamily:"'IBM Plex Mono',monospace",fontSize:14,fontWeight:700,background:"#0d1016",color:"#f0ede8",outline:"none",textAlign:"center"}}/>
+                      </div>);
+                    })}
+                  </div>
+                  {bultosEfectivos>0&&<div style={{marginTop:6,fontSize:11,color:"#a8e063",fontWeight:700,textAlign:"right"}}>= {bultosEfectivos} cajas de 36ct/25lb</div>}
+                </div>
+              )}
+              {(ex.cenas>0||ex.bultos>0)&&(
+                <div style={{marginTop:10,padding:"8px 12px",background:"#161a24",borderRadius:4,fontSize:13,display:"flex",justifyContent:"space-between",border:"1px solid #22263a"}}>
+                  <span style={{color:"#8899bb",fontWeight:700}}>Jornales + Cenas</span>
+                  <span style={{color:"#a8e063",fontWeight:700,fontSize:15}}>{money(costoJornales+costoCenas)}</span>
+                </div>
+              )}
+            </div>
+          </div>);
+        })}
+
+        {/* Totales */}
+        <div style={{background:"#161a24",border:"2px solid #22263a",borderRadius:5,padding:"14px 16px",marginBottom:10}}>
+          <div style={{fontSize:12,letterSpacing:2,textTransform:"uppercase",color:"#8899bb",marginBottom:10,fontWeight:700}}>Resumen del dia</div>
+          {[
+            ["Jornales",money(resumen.reduce((s,a)=>s+a.costoTotal,0)),"#e0dcd4"],
+            ["Cenas",money(areas.reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.cenas||0)*PRECIO_CENA;},0)),"#f0c050"],
+            ["Total jornales+cenas",money(resumen.reduce((s,a)=>s+a.costoTotal,0)+areas.reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.cenas||0)*PRECIO_CENA;},0)),"#a8e063"],
+            ["Total bultos",areas.filter(a=>a.id!=="indirectos").reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.bultos||0);},0)+" bts","#8899bb"],
+          ].map(([lbl,val,col])=>(
+            <div key={lbl} style={{display:"flex",justifyContent:"space-between",fontSize:14,padding:"6px 0",borderBottom:"1px solid #22263a"}}>
+              <span style={{color:"#8899bb",fontWeight:600}}>{lbl}</span>
+              <span style={{fontWeight:700,color:col,fontSize:15}}>{val}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Lista comparativa costo por bulto */}
+        <div className="sec">Costo por bulto por area</div>
+        <div style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:4,marginBottom:8,overflow:"hidden"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto auto auto auto",gap:0,padding:"4px 8px",borderBottom:"1px solid #1a1a1a"}}>
+            <span style={{fontSize:7,color:"#444",letterSpacing:1,textTransform:"uppercase"}}>Area</span>
+            <span style={{fontSize:7,color:"#e0dcd4",minWidth:52,textAlign:"right"}}>Jornal</span>
+            <span style={{fontSize:7,color:"#4a7acc",minWidth:44,textAlign:"right"}}>Cenas</span>
+            <span style={{fontSize:7,color:"#888",minWidth:40,textAlign:"right"}}>Bultos</span>
+            <span style={{fontSize:7,color:"#a8e063",minWidth:56,textAlign:"right"}}>$/bulto</span>
+          </div>
+          {areas.map(a=>{
+            const ex=extras[a.id]||{};
+            const bultosEf=a.id==="indirectos"
+              ?areas.filter(x=>x.id!=="indirectos").reduce((s,x)=>{const ex2=extras[x.id]||{};return s+(ex2.bultos||0);},0)
+              :(ex.bultos||0);
+            const jornal=resumen.find(r=>r.id===a.id)?.costoTotal||0;
+            const cenas=(ex.cenas||0)*PRECIO_CENA;
+            const costoBulto=bultosEf>0?(jornal+cenas)/bultosEf:0;
+            if(!jornal&&!cenas) return null;
+            return (<div key={a.id} style={{display:"grid",gridTemplateColumns:"1fr auto auto auto auto",gap:0,padding:"5px 8px",borderBottom:"1px solid #111",alignItems:"center"}}>
+              <span style={{fontSize:9,fontWeight:700,color:a.color}}>{a.nombre}</span>
+              <span style={{fontSize:9,minWidth:52,textAlign:"right",color:"#e0dcd4"}}>{money(jornal)}</span>
+              <span style={{fontSize:9,minWidth:44,textAlign:"right",color:"#4a7acc"}}>{cenas>0?money(cenas):"-"}</span>
+              <span style={{fontSize:9,minWidth:40,textAlign:"right",color:"#888"}}>{bultosEf>0?bultosEf:"-"}</span>
+              <span style={{fontSize:9,minWidth:56,textAlign:"right",fontWeight:700,color:costoBulto>0?"#a8e063":"#333"}}>{costoBulto>0?money(costoBulto):"-"}</span>
+            </div>);
+          })}
+        </div>
+
+        {/* Boton guardar en historial */}
+        <button onClick={()=>{
+          const fecha=fechaDia||new Date().toLocaleDateString("es-MX",{day:"2-digit",month:"2-digit",year:"numeric"});
+          const snap={
+            fecha, ts:Date.now(),
+            areas:areas.map(a=>{
+              const ex=extras[a.id]||{};
+              const bultosEf=a.id==="indirectos"
+                ?areas.filter(x=>x.id!=="indirectos").reduce((s,x)=>{const ex2=extras[x.id]||{};return s+(ex2.bultos||0);},0)
+                :(ex.bultos||0);
+              const jornal=resumen.find(r=>r.id===a.id)?.costoTotal||0;
+              const cenas=(ex.cenas||0)*PRECIO_CENA;
+              return {id:a.id,nombre:a.nombre,color:a.color,jornal,cenas,bultos:bultosEf,costoBulto:bultosEf>0?(jornal+cenas)/bultosEf:0};
+            }).filter(a=>a.jornal>0||a.cenas>0),
+            totalJornales:resumen.reduce((s,a)=>s+a.costoTotal,0),
+            totalCenas:areas.reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.cenas||0)*PRECIO_CENA;},0),
+            totalBultos:areas.filter(a=>a.id!=="indirectos").reduce((s,a)=>{const ex=extras[a.id]||{};return s+(ex.bultos||0);},0),
+          };
+          const histCap=lsLoad("ca-hist-cap-v1",[]);
+          lsSave("ca-hist-cap-v1",[snap,...histCap].slice(0,90));
+          alert("v Guardado en historial");
+        }} style={{width:"100%",padding:"9px",background:"#1e3a1e",border:"1.5px solid #2d8a2d",borderRadius:3,fontFamily:"'IBM Plex Mono',monospace",fontSize:9,fontWeight:700,color:"#a8e063",cursor:"pointer",letterSpacing:1,marginBottom:10}}>
+           Guardar en historial de costos
+        </button>
+
+        {/* Historial de costos por bulto */}
+        {(()=>{
+          const histCap=lsLoad("ca-hist-cap-v1",[]);
+          if(!histCap.length) return null;
+          return (<>
+            <div className="sec">Historial - costo por bulto</div>
+            {histCap.map((h,i)=>(
+              <div key={i} style={{background:"#0e0e0e",border:"1px solid #1a1a1a",borderRadius:4,marginBottom:6,overflow:"hidden"}}>
+                <div style={{background:"#141414",padding:"5px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:14,letterSpacing:2,color:"#e0dcd4"}}>{h.fecha}</span>
+                  <span style={{fontSize:8,color:"#555"}}>{h.totalBultos} bts . {money(h.totalJornales+h.totalCenas)}</span>
+                </div>
+                <div style={{padding:"5px 8px"}}>
+                  {h.areas.map((a,j)=>(
+                    <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:9,padding:"2px 0",borderBottom:"1px solid #111"}}>
+                      <span style={{color:a.color,fontWeight:700}}>{a.nombre}</span>
+                      <span style={{color:"#555"}}>{a.bultos>0?a.bultos+" bts":""}</span>
+                      <span style={{color:"#a8e063",fontWeight:700}}>{a.costoBulto>0?money(a.costoBulto)+"/bt":"-"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </>);
+        })()}
+
+      </>)}
+
+      {/* HISTORIAL - por fecha seleccionable */}
+      {tab==="historial"&&(<>
+        <div className="sec">Historial de asistencias</div>
+        {!historial.length
+          ? <div className="empty">El historial aparecera al iniciar un nuevo dia</div>
+          : historial.map((h,i)=>(
+            <HistCard key={i} h={h} areas={areas}/>
+          ))
+        }
+      </>)}
+
+
+      {/* VISTA - Headcount */}
+      {tab==="vista"&&(<>
+        <div className="sec">Headcount por area y operacion</div>
+
+        {/* Total general */}
+        <div style={{background:"#141414",border:"1px solid #222",borderRadius:4,padding:"10px 12px",marginBottom:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div style={{fontSize:7,letterSpacing:2,textTransform:"uppercase",color:"#555",marginBottom:2}}>Total planta</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:2,color:"#a8e063",lineHeight:1}}>
+              {Object.values(plantilla).flat().length} personas
+            </div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:7,letterSpacing:2,textTransform:"uppercase",color:"#555",marginBottom:2}}>Areas activas</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:28,letterSpacing:2,color:"#e0dcd4",lineHeight:1}}>
+              {areas.filter(a=>(plantilla[a.id]||[]).length>0).length}
+            </div>
+          </div>
+        </div>
+
+        {/* Por area */}
+        {areas.map(a=>{
+          const personas=plantilla[a.id]||[];
+          if(!personas.length) return null;
+          // Agrupar por operacion
+          const porOp={};
+          personas.forEach(p=>{
+            const op=p.operacion||"Sin asignar";
+            if(!porOp[op]) porOp[op]=[];
+            porOp[op].push(p.nombre||p);
+          });
+          return (
+            <div key={a.id} style={{border:"1.5px solid "+a.color+"33",borderRadius:4,marginBottom:8,overflow:"hidden"}}>
+              {/* Header area */}
+              <div style={{background:a.bg,padding:"7px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:a.color}}>{a.nombre}</div>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:24,color:a.color}}>{personas.length}</div>
+              </div>
+              {/* Por operacion */}
+              <div style={{padding:"6px 8px",background:"#0c0c0c"}}>
+                {Object.entries(porOp).map(([op,names])=>(
+                  <div key={op} style={{marginBottom:6}}>
+                    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3px 6px",background:"#141414",borderRadius:3,marginBottom:3}}>
+                      <span style={{fontSize:9,fontWeight:700,color:a.color,letterSpacing:1}}>{op}</span>
+                      <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:16,color:a.color}}>{names.length}</span>
+                    </div>
+                    {names.map((nm,i)=>(
+                      <div key={i} style={{fontSize:9,color:"#666",padding:"1px 8px",borderBottom:"1px solid #111"}}>
+                        {nm}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Sueldo fijo */}
+        <div style={{border:"1.5px solid #f0c05033",borderRadius:4,marginBottom:8,overflow:"hidden"}}>
+          <div style={{background:"#1a1500",padding:"7px 10px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:18,letterSpacing:2,color:"#f0c050"}}>Sueldo Fijo</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:24,color:"#f0c050"}}>{Object.keys(SUELDOS_FIJOS).length}</div>
+          </div>
+          <div style={{padding:"6px 8px",background:"#0c0c0c"}}>
+            {Object.entries(SUELDOS_FIJOS).map(([nombre,sueldo])=>{
+              const aBase=areas.find(a=>(plantilla[a.id]||[]).some(p=>(p.nombre||p)===nombre));
+              return (<div key={nombre} style={{display:"flex",justifyContent:"space-between",fontSize:9,padding:"3px 6px",borderBottom:"1px solid #111"}}>
+                <span style={{color:"#888"}}>{nombre.split(" ").slice(0,2).join(" ")}</span>
+                <span style={{color:"#f0c050",fontWeight:700}}>{money(sueldo/7)}/dia . {aBase?.nombre||"-"}</span>
+              </div>);
+            })}
+          </div>
+        </div>
+      </>)}
+
+      {/* HISTORIAL */}
+      {tab==="historial"&&(<>
+        <div className="sec">Historial diario</div>
+        {!historial.length?<div className="empty">El historial aparecera al iniciar un nuevo dia</div>
+        :historial.map((h,i)=>(
+          <div className="hcard" key={i}>
+            <div className="hhd">
+              <span className="hfecha">{h.fechaDia||h.fecha}</span>
+              <span style={{fontSize:8,color:"#666"}}>{h.presentes} presentes</span>
+              <span style={{fontSize:11,fontWeight:700,color:"#a8e063"}}>{money(h.totalPlanta||0)}</span>
+            </div>
+            <div className="hbd">
+              {(h.resAreas||[]).filter(a=>a.costoTotal>0).map(a=>(
+                <div key={a.id}>
+                  <div className="hr"><label style={{color:a.color,fontWeight:700}}>{a.nombre}</label><span>{money(a.costoTotal)}</span></div>
+                  {(a.personas||[]).map((p,j)=>(
+                    <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:7,padding:"1px 8px",color:"#444",borderBottom:"1px solid #0e0e0e"}}>
+                      <span style={{color:p.esBase?"#666":"#4a7acc"}}>{p.nombre.split(" ").slice(0,2).join(" ")}{!p.esBase?" (ext)":""}</span>
+                      <span>{fmt1(p.horas)}h en area</span>
+                      <span style={{color:"#a8e063"}}>{money(p.costoEnArea)}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+              {h.fijosPresentes?.length>0&&(
+                <div>
+                  <div className="hr"><label style={{color:"#cc8a00",fontWeight:700}}>Sueldo Fijo</label><span>{money(h.totalFijos||0)}</span></div>
+                  {h.fijosPresentes.map((f,j)=>(
+                    <div key={j} style={{display:"flex",justifyContent:"space-between",fontSize:7,padding:"1px 8px",color:"#444",borderBottom:"1px solid #0e0e0e"}}>
+                      <span>{f.nombre.split(" ").slice(0,2).join(" ")}</span>
+                      <span style={{color:"#a8e063"}}>{money(f.costoDia)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {h.ausentes?.length>0&&<div style={{fontSize:7,color:"#333",marginTop:4}}>Ausentes: {h.ausentes.join(", ")}</div>}
+            </div>
+          </div>
+        ))}
+        {!!historial.length&&(confirmDelHist?(
+          <div className="confirm" style={{background:"#1a0d0d",border:"1.5px solid #cc4a4a",marginTop:8}}>
+            <p style={{color:"#cc4a4a"}}>Borrar todo el historial?</p>
+            <div className="cfbtns"><button className="csi" onClick={()=>{saveHist([]);setConfirmDelHist(false);}}>Si, borrar</button><button className="cno" onClick={()=>setConfirmDelHist(false)}>Cancelar</button></div>
+          </div>
+        ):(
+          <button className="bdanger" onClick={()=>setConfirmDelHist(true)}> Borrar historial</button>
+        ))}
+      </>)}
+
+    </div>
+  </>);
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
